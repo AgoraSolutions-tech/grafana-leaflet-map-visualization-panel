@@ -1,50 +1,83 @@
 import React from "react";
 import { StandardEditorProps } from "@grafana/data"
-import { mockPolygons } from "mock/poligons";
-import { PolygonCollection } from "types"
-import { Button } from "@grafana/ui";
+import { Area } from "types"
+import { Button, ColorPicker, FieldArray, Form, HorizontalGroup, Input, Label } from "@grafana/ui";
 
-type PolygonEditorProps = StandardEditorProps<PolygonCollection[]>;
+type PolygonEditorProps = StandardEditorProps<Area[]>;
 
-export const PolygonEditor = ({ value, onChange, }: PolygonEditorProps) => {
-  const options = mockPolygons;
-  
-  const handleRemovePolygon = (id: string) => {
-    if (value.length === 1) {
-      onChange([]);
-    }
-    onChange(value.filter(polygon => polygon.id !== id))
-  };
-
+export const PolygonEditor = ({ value, onChange }: PolygonEditorProps) => {
+  console.log(value)
   return (
-    <>
-      <div>
-        <select
-          value=''
-          onChange={e => {
-            const selectedPolygon = options.find(polygon => polygon.id === e.target.value);
-            console.log(e.target.value, selectedPolygon)
-            if (selectedPolygon) {
-              onChange([...(value || []), selectedPolygon])
-            }
-          }}
-        >
-          <option value="">Select a polygon</option>
-          {options.filter(option => !value.some(selected => selected.id === option.id )).map(polygon => (
-            <option key={polygon.id} value={polygon.id}>
-              {polygon.name}
-            </option>
-          ))}
-        </select>
-      </div>
-      <ul>
-        {value?.map(polygon => (
-          <li key={polygon.id}>
-            {polygon.name}
-            <Button size="sm" icon="minus" variant="secondary" onClick={() => handleRemovePolygon(polygon.id)} />
-          </li>
-        ))}
-      </ul>
-    </>
+    <Form onSubmit={(values) => 
+      onChange(values.areas.map((v: any) => ({
+        name: v.name,
+        color: v.color,
+        positionX: v.positionX,
+        positionY: v.positionY
+      }) ))
+    }>
+      {({ control, register,  watch, setValue }) => (
+        <div>
+          <FieldArray control={control} name="areas">
+            {({ fields, append, remove }) => (
+              <>
+                <div style={{ marginBottom: '1rem' }}>
+                  {fields.map((field, index) => (
+                    <div key={index}>
+                      <HorizontalGroup >
+                        <div>
+                          <Label>Name</Label>
+                          <Input
+                            key={`areas.${index}.name`}
+                            {...register(`areas.${index}.name` as const)}
+                          />
+                        </div>
+                        <div>
+                          <Label>Color</Label>
+                          <Input
+                            prefix={
+                              <ColorPicker color={watch(`areas.${index}.color`) || 'red'} onChange={(color) => {
+                                setValue(`areas.${index}.color`, color);
+                              }} />
+                            }
+                            key={`areas.${index}.color`}
+                            {...register(`areas.${index}.color` as const)}
+                          />
+                        </div>
+                        <Button variant="secondary" size='lg' fill="text" icon="x" onClick={() => remove(index)} />
+                      </HorizontalGroup>
+                      <HorizontalGroup>
+                        <div>
+                          <Label>Position X</Label>
+                          <Input
+                            key={field.positionX}
+                            {...register(`areas.${index}.positionX` as const)}
+                          />
+                        </div>
+                        <div>
+                          <Label>Position Y</Label>
+                          <Input
+                            key={field.positionY}
+                            {...register(`areas.${index}.positionY` as const)}
+                          />
+                        </div>
+                      </HorizontalGroup>
+                    </div>
+                  ))}
+                </div>
+                <Button
+                  style={{ marginRight: '1rem' }}
+                  onClick={() => append({ name: '', color: '', positionX: '', positionY: '' })}
+                  variant="secondary" size='sm' icon='plus'
+                >
+                  Add area
+                </Button>
+              </>
+            )}
+          </FieldArray>
+          <Button type="submit" variant="secondary" size='sm'>Save</Button>
+        </div>
+      )}
+    </Form>
   )
 };
