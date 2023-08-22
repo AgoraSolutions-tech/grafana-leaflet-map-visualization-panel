@@ -2,8 +2,6 @@ import { PanelPlugin } from '@grafana/data';
 import { MapOptions } from './types';
 import { MapComponent } from 'components/MapComponent';
 import { PolygonEditor } from 'components/PolygonEditor';
-import { ItemEditor } from 'components/ItemEditor';
-
 
 export const plugin = new PanelPlugin<MapOptions>(MapComponent).setPanelOptions((builder) => {
   builder
@@ -18,16 +16,17 @@ export const plugin = new PanelPlugin<MapOptions>(MapComponent).setPanelOptions(
       name: 'Longitude',
       defaultValue: 17.022015194482723
     })
-    .addCustomEditor({
-      id: 'item',
-      path: 'items',
-      name: 'Item',
-      editor: ItemEditor,
-    })
-    .addCustomEditor({
-      id: 'polygons',
-      path: 'polygons',
-      name: 'Polygons',
-      editor: PolygonEditor,
+    .addNestedOptions({
+      category: ['Polygons'],
+      path: 'Areas',
+      build: (builder) => {
+        builder
+        .addCustomEditor({
+          id: 'polygons-input',
+          path: 'polygons',
+          editor: PolygonEditor,
+          name: ''
+        })
+      }
     })
 });

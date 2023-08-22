@@ -9,6 +9,8 @@ export interface SimpleOptions {
   lng: number
 }
 
+
+
 export interface ItemCollection {
   id: string;
   name: string;
@@ -17,6 +19,12 @@ export interface ItemCollection {
   lng: number;
 }
 
+export interface Area {
+  name: string;
+  color: string;
+  positionX: number;
+  positionY: number
+}
 
 export interface PolygonCollection {
   id: string;
@@ -29,4 +37,5 @@ export interface MapOptions {
   lng: number;
   items: ItemCollection[];
   polygons: PolygonCollection[];
+  areas: Area[];
 }
