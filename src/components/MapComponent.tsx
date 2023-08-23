@@ -7,6 +7,7 @@ import { cx, css } from "@emotion/css";
 import { useStyles2 } from "@grafana/ui";
 
 import "leaflet/dist/leaflet.css";
+import { MapContainerDescendant } from "./MapContainerDescendant";
 
 
 interface Props extends PanelProps<MapOptions> { }
@@ -24,8 +25,13 @@ export const MapComponent: React.FC<Props> = ({ options, width, height }) => {
   const mapCenter: LatLngExpression = [options.lat, options.lng];
   const styles = useStyles2(getStyles);
 
+  const handleMapPositionChange = (position: { lng: number, lat: number }) => {
+    options.lat = position.lat;
+    options.lng = position.lng;
+  };
+  
   const areas = options.areas || [];
- 
+  console.log(options)
   return (
     <MapContainer
       center={mapCenter}
@@ -41,7 +47,7 @@ export const MapComponent: React.FC<Props> = ({ options, width, height }) => {
       <TileLayer attribution='&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, <a href="http://viewfinderpanoramas.org">SRTM</a>OpenStreetMap</a>OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
-      
+      <MapContainerDescendant onPositionChange={handleMapPositionChange} />
       {areas.map((area: any, index: number) => {
         const center = [area.positionX, area.positionY] as LatLngExpression
         return (
@@ -53,5 +59,5 @@ export const MapComponent: React.FC<Props> = ({ options, width, height }) => {
         )
       })}
     </MapContainer>
-  )
+  ) 
 };

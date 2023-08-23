@@ -8,12 +8,10 @@ export const plugin = new PanelPlugin<MapOptions>(MapComponent).setPanelOptions(
     .addNumberInput({
       path: 'lat',
       name: 'Latitude',
-      defaultValue: 51.11030747949518,
     })
     .addNumberInput({
       path: 'lng',
       name: 'Longitude',
-      defaultValue: 17.03483998297049
     })
     .addCustomEditor({
       category: ['Areas'],
