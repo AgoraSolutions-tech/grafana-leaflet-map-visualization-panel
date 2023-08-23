@@ -6,11 +6,10 @@ import { FieldValues } from "react-hook-form";
 
 type PolygonEditorProps = StandardEditorProps<Area[]>;
 
-export const PolygonEditor = ({ value, onChange }: PolygonEditorProps) => {
-  
-  const initialValues = useMemo<FieldValues> (() => {
+export const PolygonEditor = ({ value, onChange, context }: PolygonEditorProps) => {
+  const initialValues = useMemo<FieldValues>(() => {
     return ({
-      areas: value.map(area => ({
+      areas: (value || []).map(area => ({
         id: area.id,
         name: area.name,
         color: area.color,
@@ -28,9 +27,9 @@ export const PolygonEditor = ({ value, onChange }: PolygonEditorProps) => {
         color: v.color,
         positionX: v.positionX,
         positionY: v.positionY
-      }) ))}
+      })))}
     }>
-      {({ control, register,  watch, setValue }) => (
+      {({ control, register, watch, setValue }) => (
         <div>
           <FieldArray control={control} name="areas">
             {({ append, fields, remove }) => (
@@ -60,6 +59,7 @@ export const PolygonEditor = ({ value, onChange }: PolygonEditorProps) => {
                         </div>
                         <Button variant="secondary" size='lg' fill="text" icon="x" onClick={() => remove(index)} />
                       </HorizontalGroup>
+
                       <HorizontalGroup>
                         <div>
                           <Label>Position X</Label>
@@ -82,7 +82,13 @@ export const PolygonEditor = ({ value, onChange }: PolygonEditorProps) => {
                 </div>
                 <Button
                   style={{ marginRight: '1rem' }}
-                  onClick={() => append({ id: Math.random(), name:  '', color: '', positionX: '', positionY: '' })}
+                  onClick={() => append({
+                    id: Math.random(),
+                    name: `Area ${fields ? fields.length + 1 : 1}`,
+                    color: 'red',
+                    positionX: context.options.lat,
+                    positionY: context.options.lng
+                  })}
                   variant="secondary" size='sm' icon='plus'
                 >
                   Add area

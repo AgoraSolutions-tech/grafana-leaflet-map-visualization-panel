@@ -1,15 +1,5 @@
 import { LatLngTuple } from "leaflet";
 
-type SeriesSize = 'sm' | 'md' | 'lg';
-export interface SimpleOptions {
-  text: string;
-  showSeriesCount: boolean;
-  seriesCountSize: SeriesSize;
-  lat: number;
-  lng: number
-}
-
-
 
 export interface ItemCollection {
   id: string;
@@ -38,7 +28,5 @@ export interface MapOptions {
   lng: number;
   items: ItemCollection[];
   polygons: PolygonCollection[];
-  areasEditor: {
-    areas: Area[];
-  };
+  areas: Area[];
 }
