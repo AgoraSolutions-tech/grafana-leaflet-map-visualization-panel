@@ -1,6 +1,6 @@
 import React from "react";
 import { PanelProps } from "@grafana/data";
-import { Marker, Popup, TileLayer, MapContainer, Polygon } from "react-leaflet";
+import { Marker, Popup, TileLayer, MapContainer, Circle } from "react-leaflet";
 import { Icon, LatLngExpression } from 'leaflet';
 import { MapOptions } from "types"
 import { cx, css } from "@emotion/css";
@@ -24,8 +24,9 @@ export const MapComponent: React.FC<Props> = ({ options, width, height, data }) 
   const center: LatLngExpression = [options.lat, options.lng];
   const styles = useStyles2(getStyles);
 
-  const boats = options.items || [];
-  const polygons = options.polygons || []; 
+  const boats = options.items;
+  const areas = options.areasEditor.areas;
+
 
   const pinIcon = new Icon({
     iconUrl: 'https://cdn-icons-png.flaticon.com/128/9101/9101314.png',
@@ -55,9 +56,11 @@ export const MapComponent: React.FC<Props> = ({ options, width, height, data }) 
         </Marker>
       ))
       }
-      {polygons.map(polygon => (
-        <Polygon key={polygon.id} pathOptions={{ color: 'red' }} positions={polygon.vertices} />
-      ))}
+      {areas.map((area: any, index: number) => {
+        const center = [area.positionX, area.positionY] as LatLngExpression
+        return (
+        <Circle key={index} center={center} radius={200} pathOptions={ {fillColor: area.color, color: area.color} }></Circle>
+      )} )}
     </MapContainer>
   )
 };

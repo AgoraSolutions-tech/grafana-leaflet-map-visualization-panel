@@ -20,10 +20,11 @@ export interface ItemCollection {
 }
 
 export interface Area {
+  id: number;
   name: string;
   color: string;
   positionX: number;
-  positionY: number
+  positionY: number;
 }
 
 export interface PolygonCollection {
@@ -37,5 +38,7 @@ export interface MapOptions {
   lng: number;
   items: ItemCollection[];
   polygons: PolygonCollection[];
-  areas: Area[];
+  areasEditor: {
+    areas: Area[];
+  };
 }

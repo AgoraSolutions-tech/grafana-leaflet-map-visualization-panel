@@ -9,7 +9,6 @@ export const plugin = new PanelPlugin<MapOptions>(MapComponent).setPanelOptions(
       path: 'lat',
       name: 'Latitude',
       defaultValue: 51.102622400211935,
-
     })
     .addNumberInput({
       path: 'lng',
@@ -17,13 +16,13 @@ export const plugin = new PanelPlugin<MapOptions>(MapComponent).setPanelOptions(
       defaultValue: 17.022015194482723
     })
     .addNestedOptions({
-      category: ['Polygons'],
-      path: 'Areas',
+      category: ['Areas'],
+      path: 'areasEditor',
       build: (builder) => {
         builder
         .addCustomEditor({
-          id: 'polygons-input',
-          path: 'polygons',
+          id: 'areas',
+          path: 'areas',
           editor: PolygonEditor,
           name: ''
         })

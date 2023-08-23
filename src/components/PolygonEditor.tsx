@@ -1,35 +1,49 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { StandardEditorProps } from "@grafana/data"
 import { Area } from "types"
 import { Button, ColorPicker, FieldArray, Form, HorizontalGroup, Input, Label } from "@grafana/ui";
+import { FieldValues } from "react-hook-form";
 
 type PolygonEditorProps = StandardEditorProps<Area[]>;
 
 export const PolygonEditor = ({ value, onChange }: PolygonEditorProps) => {
-  console.log(value)
+  
+  const initialValues = useMemo<FieldValues> (() => {
+    return ({
+      areas: value.map(area => ({
+        id: area.id,
+        name: area.name,
+        color: area.color,
+        positionX: area.positionX,
+        positionY: area.positionY
+      }))
+    })
+  }, [value]);
+
   return (
-    <Form onSubmit={(values) => 
-      onChange(values.areas.map((v: any) => ({
+    <Form defaultValues={initialValues} onSubmit={(values) => {
+      onChange(values.areas.map((v: Area) => ({
+        id: v.id,
         name: v.name,
         color: v.color,
         positionX: v.positionX,
         positionY: v.positionY
-      }) ))
+      }) ))}
     }>
       {({ control, register,  watch, setValue }) => (
         <div>
           <FieldArray control={control} name="areas">
-            {({ fields, append, remove }) => (
+            {({ append, fields, remove }) => (
               <>
                 <div style={{ marginBottom: '1rem' }}>
                   {fields.map((field, index) => (
-                    <div key={index}>
+                    <div key={field.id}>
                       <HorizontalGroup >
                         <div>
                           <Label>Name</Label>
                           <Input
-                            key={`areas.${index}.name`}
                             {...register(`areas.${index}.name` as const)}
+                            defaultValue={field.name}
                           />
                         </div>
                         <div>
@@ -40,8 +54,8 @@ export const PolygonEditor = ({ value, onChange }: PolygonEditorProps) => {
                                 setValue(`areas.${index}.color`, color);
                               }} />
                             }
-                            key={`areas.${index}.color`}
                             {...register(`areas.${index}.color` as const)}
+                            defaultValue={field.color}
                           />
                         </div>
                         <Button variant="secondary" size='lg' fill="text" icon="x" onClick={() => remove(index)} />
@@ -50,24 +64,25 @@ export const PolygonEditor = ({ value, onChange }: PolygonEditorProps) => {
                         <div>
                           <Label>Position X</Label>
                           <Input
-                            key={field.positionX}
                             {...register(`areas.${index}.positionX` as const)}
+                            defaultValue={field.positionX}
                           />
                         </div>
                         <div>
                           <Label>Position Y</Label>
                           <Input
-                            key={field.positionY}
                             {...register(`areas.${index}.positionY` as const)}
+                            defaultValue={field.positionY}
                           />
                         </div>
                       </HorizontalGroup>
+                      <br />
                     </div>
                   ))}
                 </div>
                 <Button
                   style={{ marginRight: '1rem' }}
-                  onClick={() => append({ name: '', color: '', positionX: '', positionY: '' })}
+                  onClick={() => append({ id: Math.random(), name:  '', color: '', positionX: '', positionY: '' })}
                   variant="secondary" size='sm' icon='plus'
                 >
                   Add area
