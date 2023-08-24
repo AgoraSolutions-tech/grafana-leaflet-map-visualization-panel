@@ -1,50 +1,104 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { StandardEditorProps } from "@grafana/data"
-import { mockPolygons } from "mock/poligons";
-import { PolygonCollection } from "types"
-import { Button } from "@grafana/ui";
+import { Area } from "types"
+import { Button, ColorPicker, FieldArray, Form, HorizontalGroup, Input, Label } from "@grafana/ui";
+import { FieldValues } from "react-hook-form";
 
-type PolygonEditorProps = StandardEditorProps<PolygonCollection[]>;
+type PolygonEditorProps = StandardEditorProps<Area[]>;
 
-export const PolygonEditor = ({ value, onChange, }: PolygonEditorProps) => {
-  const options = mockPolygons;
-  
-  const handleRemovePolygon = (id: string) => {
-    if (value.length === 1) {
-      onChange([]);
-    }
-    onChange(value.filter(polygon => polygon.id !== id))
-  };
+export const PolygonEditor = ({ value, onChange, context }: PolygonEditorProps) => {
+  const initialValues = useMemo<FieldValues>(() => {
+    return ({
+      areas: (value || []).map(area => ({
+        id: area.id,
+        name: area.name,
+        color: area.color,
+        positionX: area.positionX,
+        positionY: area.positionY
+      }))
+    })
+  }, [value]);
 
   return (
-    <>
-      <div>
-        <select
-          value=''
-          onChange={e => {
-            const selectedPolygon = options.find(polygon => polygon.id === e.target.value);
-            console.log(e.target.value, selectedPolygon)
-            if (selectedPolygon) {
-              onChange([...(value || []), selectedPolygon])
-            }
-          }}
-        >
-          <option value="">Select a polygon</option>
-          {options.filter(option => !value.some(selected => selected.id === option.id )).map(polygon => (
-            <option key={polygon.id} value={polygon.id}>
-              {polygon.name}
-            </option>
-          ))}
-        </select>
-      </div>
-      <ul>
-        {value?.map(polygon => (
-          <li key={polygon.id}>
-            {polygon.name}
-            <Button size="sm" icon="minus" variant="secondary" onClick={() => handleRemovePolygon(polygon.id)} />
-          </li>
-        ))}
-      </ul>
-    </>
+    <Form defaultValues={initialValues} onSubmit={(values) => {
+      onChange(values.areas.map((v: Area) => ({
+        id: v.id,
+        name: v.name,
+        color: v.color,
+        positionX: v.positionX,
+        positionY: v.positionY
+      })))}
+    }>
+      {({ control, register, watch, setValue }) => (
+        <div>
+          <FieldArray control={control} name="areas">
+            {({ append, fields, remove }) => (
+              <>
+                <div style={{ marginBottom: '1rem' }}>
+                  {fields.map((field, index) => (
+                    <div key={field.id}>
+                      <HorizontalGroup >
+                        <div>
+                          <Label>Name</Label>
+                          <Input
+                            {...register(`areas.${index}.name` as const)}
+                            defaultValue={field.name}
+                          />
+                        </div>
+                        <div>
+                          <Label>Color</Label>
+                          <Input
+                            prefix={
+                              <ColorPicker color={watch(`areas.${index}.color`) || 'red'} onChange={(color) => {
+                                setValue(`areas.${index}.color`, color);
+                              }} />
+                            }
+                            {...register(`areas.${index}.color` as const)}
+                            defaultValue={field.color}
+                          />
+                        </div>
+                        <Button variant="secondary" size='lg' fill="text" icon="x" onClick={() => remove(index)} />
+                      </HorizontalGroup>
+
+                      <HorizontalGroup>
+                        <div>
+                          <Label>Position X</Label>
+                          <Input
+                            {...register(`areas.${index}.positionX` as const)}
+                            defaultValue={field.positionX}
+                          />
+                        </div>
+                        <div>
+                          <Label>Position Y</Label>
+                          <Input
+                            {...register(`areas.${index}.positionY` as const)}
+                            defaultValue={field.positionY}
+                          />
+                        </div>
+                      </HorizontalGroup>
+                      <br />
+                    </div>
+                  ))}
+                </div>
+                <Button
+                  style={{ marginRight: '1rem' }}
+                  onClick={() => append({
+                    id: Math.random(),
+                    name: `Area ${fields ? fields.length + 1 : 1}`,
+                    color: 'red',
+                    positionX: context.options.lat,
+                    positionY: context.options.lng
+                  })}
+                  variant="secondary" size='sm' icon='plus'
+                >
+                  Add area
+                </Button>
+              </>
+            )}
+          </FieldArray>
+          <Button type="submit" variant="secondary" size='sm'>Save</Button>
+        </div>
+      )}
+    </Form>
   )
 };
