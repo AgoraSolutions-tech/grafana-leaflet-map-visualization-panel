@@ -9,14 +9,14 @@ type EditorProps = StandardEditorProps<ItemCollection[]>
 
 export const ItemEditor = ({ value, onChange, context }: EditorProps) => {
   const options = mockBoats || [];
-  const itemArray = value || []
+  const itemArray = value || [];
   
   const handleRemoveItem = (id: string) => {
     if(value.length === 1){
       onChange([]);
     }
     onChange(value.filter(item => item.id !== id));
-  }
+  };
   
   return (
     <>
@@ -48,4 +48,4 @@ export const ItemEditor = ({ value, onChange, context }: EditorProps) => {
       </ul>
     </> 
   )
-}
+};
