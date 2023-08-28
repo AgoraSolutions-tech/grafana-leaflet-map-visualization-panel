@@ -1,24 +1,44 @@
 import React, { useMemo } from 'react';
 import { StandardEditorProps } from '@grafana/data';
 import { Area } from 'types';
-import { Button, ColorPicker, FieldArray, Form, HorizontalGroup, InlineSwitch, Input, Label } from '@grafana/ui';
+import {
+  Button,
+  ColorPicker,
+  FieldArray,
+  Form,
+  HorizontalGroup,
+  InlineSwitch,
+  Input,
+  Label,
+  useStyles2,
+} from '@grafana/ui';
 import { FieldValues } from 'react-hook-form';
 import { VerticlesForm } from './VerticlesForm';
+import { css } from '@emotion/css';
 
 type PolygonEditorProps = StandardEditorProps<{ isTooltipSticky: boolean; areas: Area[] }>;
 
+const getSyles = () => {
+  return {
+    tooltipWrapper: css`
+      margin-bottom: 25px;
+    `
+  };
+};
+
 export const PolygonEditor = ({ value, onChange, context }: PolygonEditorProps) => {
-  console.log('value: ', value);
+    const styles = useStyles2(getSyles);
+
   const initialValues = useMemo<FieldValues>(() => {
-    return ({
+    return {
       areas: (value.areas || []).map((area) => ({
-          id: area.id,
-          name: area.name,
-          color: area.color,
-          verticles: area.verticles,
-        })),
-        isTooltipSticky: value.isTooltipSticky
-      });
+        id: area.id,
+        name: area.name,
+        color: area.color,
+        verticles: area.verticles,
+      })),
+      isTooltipSticky: value.isTooltipSticky,
+    };
   }, [value]);
 
   const calculatePolygonVerticles = (lat: number, lng: number) => {
@@ -35,7 +55,6 @@ export const PolygonEditor = ({ value, onChange, context }: PolygonEditorProps) 
     <Form
       defaultValues={initialValues}
       onSubmit={(values) => {
-        console.log('values: ', values);
         onChange({
           isTooltipSticky: values.isTooltipSticky,
           areas: values.areas.map((v: Area) => ({
@@ -49,7 +68,13 @@ export const PolygonEditor = ({ value, onChange, context }: PolygonEditorProps) 
     >
       {({ control, register, watch, setValue }) => (
         <div>
-          <InlineSwitch showLabel={true} label={value.isTooltipSticky ? 'Sticky tooltip' : 'Pernament tooltip'} {...register(`isTooltipSticky` as const)} />
+          <div className={styles.tooltipWrapper}>
+            <InlineSwitch
+              showLabel={true}
+              label={value.isTooltipSticky ? 'Sticky tooltip' : 'Pernament tooltip'}
+              {...register(`isTooltipSticky` as const)}
+            />
+          </div>
           <FieldArray control={control} name="areas">
             {({ append, fields, remove }) => (
               <>
