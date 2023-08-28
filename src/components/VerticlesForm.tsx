@@ -16,7 +16,7 @@ const getSyles = () => {
     `,
     firstVertex: css`
       position: relative;
-      top: 15px;
+      top: 20px;
     `,
   };
 };
@@ -52,21 +52,21 @@ export const VerticlesForm = ({ control, register, index, initialIsOpen = false 
                         <Label className={vertexIndex === 0 ? styles.firstVertex : ''}>{vertexIndex + 1}</Label>
                         <div>
                           {vertexIndex === 0 && <Label className={styles.styledLabel}>Latitude: </Label>}
-                          <Input
-                            {...register(`areas.${index}.verticles.${vertexIndex}.lat` as const, {
-                              valueAsNumber: true,
-                            })}
-                            defaultValue={vertex.lat}
-                          />
+                            <Input
+                              {...register(`areas.${index}.verticles.${vertexIndex}.lat` as const, {
+                                valueAsNumber: true,
+                              })}
+                              defaultValue={vertex.lat}
+                            />                        
                         </div>
                         <div>
                           {vertexIndex === 0 && <Label className={styles.styledLabel}>Longitude: </Label>}
-                          <Input
-                            {...register(`areas.${index}.verticles.${vertexIndex}.lng` as const, {
-                              valueAsNumber: true,
-                            })}
-                            defaultValue={vertex.lng}
-                          />
+                            <Input
+                              {...register(`areas.${index}.verticles.${vertexIndex}.lng` as const, {
+                                valueAsNumber: true,
+                              })}
+                              defaultValue={vertex.lng}
+                            />
                         </div>
                         <Button
                           icon="trash-alt"
