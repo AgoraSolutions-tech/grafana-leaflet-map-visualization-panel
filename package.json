@@ -59,7 +59,7 @@
   "dependencies": {
     "@emotion/css": "^11.11.2",
     "@emotion/react": "^11.11.1",
-    "@grafana/data": "^10.0.3",
+    "@grafana/data": "^10.1.0",
     "@grafana/runtime": "^10.0.3",
     "@grafana/ui": "^10.0.3",
     "leaflet": "^1.9.4",

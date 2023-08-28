@@ -1,8 +1,8 @@
 import React from "react";
 import { PanelProps } from "@grafana/data";
-import { TileLayer, MapContainer, Circle, Tooltip } from "react-leaflet";
+import { TileLayer, MapContainer, Tooltip, Polygon } from "react-leaflet";
 import { LatLngExpression } from 'leaflet';
-import { MapOptions } from "types"
+import { Area, MapOptions } from "types"
 import { cx, css } from "@emotion/css";
 import { useStyles2 } from "@grafana/ui";
 
@@ -16,7 +16,6 @@ const getStyles = () => {
   return {
     wrapper: css`
       font-family: Open Sans;
-      position: relative;
     `,
   }
 };
@@ -24,14 +23,15 @@ const getStyles = () => {
 export const MapComponent: React.FC<Props> = ({ options, width, height }) => {
   const mapCenter: LatLngExpression = [options.lat, options.lng];
   const styles = useStyles2(getStyles);
+  const areas = options.areas.areas || [];
+  const isSticky = options.areas.isTooltipSticky;
 
   const handleMapPositionChange = (position: { lng: number, lat: number }) => {
     options.lat = position.lat;
     options.lng = position.lng;
   };
-  
-  const areas = options.areas || [];
-  console.log(options)
+ 
+  console.log('map options: ', options);
   return (
     <MapContainer
       center={mapCenter}
@@ -48,16 +48,15 @@ export const MapComponent: React.FC<Props> = ({ options, width, height }) => {
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
       <MapContainerDescendant onPositionChange={handleMapPositionChange} />
-      {areas.map((area: any, index: number) => {
-        const center = [area.positionX, area.positionY] as LatLngExpression
+      {areas.map((area: Area, index: number) => {
         return (
           <div key={index}>
-            <Circle center={center} radius={200} pathOptions={{ fillColor: area.color, color: area.color }}>
-              <Tooltip sticky>{area.name}</Tooltip>
-            </Circle>
+            <Polygon positions={area.verticles} pathOptions={{ color: area.color }}>
+              <Tooltip sticky={isSticky} permanent={!isSticky}>{area.name}</Tooltip>
+            </Polygon>
           </div>
         )
       })}
     </MapContainer>
-  ) 
+  )
 };

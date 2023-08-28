@@ -1,104 +1,140 @@
-import React, { useMemo } from "react";
-import { StandardEditorProps } from "@grafana/data"
-import { Area } from "types"
-import { Button, ColorPicker, FieldArray, Form, HorizontalGroup, Input, Label } from "@grafana/ui";
-import { FieldValues } from "react-hook-form";
+import React, { useMemo } from 'react';
+import { StandardEditorProps } from '@grafana/data';
+import { Area } from 'types';
+import {
+  Button,
+  ColorPicker,
+  FieldArray,
+  Form,
+  HorizontalGroup,
+  InlineSwitch,
+  Input,
+  Label,
+  useStyles2,
+} from '@grafana/ui';
+import { FieldValues } from 'react-hook-form';
+import { VerticlesForm } from './VerticlesForm';
+import { css } from '@emotion/css';
 
-type PolygonEditorProps = StandardEditorProps<Area[]>;
+type PolygonEditorProps = StandardEditorProps<{ isTooltipSticky: boolean; areas: Area[] }>;
+
+const getSyles = () => {
+  return {
+    tooltipWrapper: css`
+      margin-bottom: 25px;
+    `
+  };
+};
 
 export const PolygonEditor = ({ value, onChange, context }: PolygonEditorProps) => {
+    const styles = useStyles2(getSyles);
+
   const initialValues = useMemo<FieldValues>(() => {
-    return ({
-      areas: (value || []).map(area => ({
+    return {
+      areas: (value.areas || []).map((area) => ({
         id: area.id,
         name: area.name,
         color: area.color,
-        positionX: area.positionX,
-        positionY: area.positionY
-      }))
-    })
+        verticles: area.verticles,
+      })),
+      isTooltipSticky: value.isTooltipSticky,
+    };
   }, [value]);
 
+  const calculatePolygonVerticles = (lat: number, lng: number) => {
+    const diff = 0.001;
+    return [
+      { lat: lat - diff, lng: lng + diff, id: Math.random() },
+      { lat: lat - diff, lng: lng - diff, id: Math.random() },
+      { lat: lat + diff, lng: lng - diff, id: Math.random() },
+      { lat: lat + diff, lng: lng + diff, id: Math.random() },
+    ];
+  };
+
   return (
-    <Form defaultValues={initialValues} onSubmit={(values) => {
-      onChange(values.areas.map((v: Area) => ({
-        id: v.id,
-        name: v.name,
-        color: v.color,
-        positionX: v.positionX,
-        positionY: v.positionY
-      })))}
-    }>
+    <Form
+      defaultValues={initialValues}
+      onSubmit={(values) => {
+        onChange({
+          isTooltipSticky: values.isTooltipSticky,
+          areas: values.areas.map((v: Area) => ({
+            id: v.id,
+            name: v.name,
+            color: v.color,
+            verticles: v.verticles,
+          })),
+        });
+      }}
+    >
       {({ control, register, watch, setValue }) => (
         <div>
+          <div className={styles.tooltipWrapper}>
+            <InlineSwitch
+              showLabel={true}
+              label={value.isTooltipSticky ? 'Sticky tooltip' : 'Pernament tooltip'}
+              {...register(`isTooltipSticky` as const)}
+            />
+          </div>
           <FieldArray control={control} name="areas">
             {({ append, fields, remove }) => (
               <>
                 <div style={{ marginBottom: '1rem' }}>
                   {fields.map((field, index) => (
                     <div key={field.id}>
-                      <HorizontalGroup >
+                      <input {...register(`areas.${index}.id` as const)} defaultValue={field.id} type="hidden" />
+                      <HorizontalGroup>
                         <div>
                           <Label>Name</Label>
-                          <Input
-                            {...register(`areas.${index}.name` as const)}
-                            defaultValue={field.name}
-                          />
+                          <Input {...register(`areas.${index}.name` as const)} defaultValue={field.name} />
                         </div>
                         <div>
                           <Label>Color</Label>
                           <Input
                             prefix={
-                              <ColorPicker color={watch(`areas.${index}.color`) || 'red'} onChange={(color) => {
-                                setValue(`areas.${index}.color`, color);
-                              }} />
+                              <ColorPicker
+                                color={watch(`areas.${index}.color`) || 'red'}
+                                onChange={(color) => {
+                                  setValue(`areas.${index}.color`, color);
+                                }}
+                              />
                             }
                             {...register(`areas.${index}.color` as const)}
                             defaultValue={field.color}
                           />
                         </div>
-                        <Button variant="secondary" size='lg' fill="text" icon="x" onClick={() => remove(index)} />
-                      </HorizontalGroup>
-
-                      <HorizontalGroup>
-                        <div>
-                          <Label>Position X</Label>
-                          <Input
-                            {...register(`areas.${index}.positionX` as const)}
-                            defaultValue={field.positionX}
-                          />
-                        </div>
-                        <div>
-                          <Label>Position Y</Label>
-                          <Input
-                            {...register(`areas.${index}.positionY` as const)}
-                            defaultValue={field.positionY}
-                          />
-                        </div>
+                        <Button variant="secondary" size="lg" fill="text" icon="x" onClick={() => remove(index)} />
                       </HorizontalGroup>
                       <br />
+                      <VerticlesForm initialIsOpen={field.isNew} control={control} register={register} index={index} />
+                      <div style={{ margin: '10px 0 20px', height: '1px', width: '100%' }} />
                     </div>
                   ))}
                 </div>
                 <Button
                   style={{ marginRight: '1rem' }}
-                  onClick={() => append({
-                    id: Math.random(),
-                    name: `Area ${fields ? fields.length + 1 : 1}`,
-                    color: 'red',
-                    positionX: context.options.lat,
-                    positionY: context.options.lng
-                  })}
-                  variant="secondary" size='sm' icon='plus'
+                  onClick={() => {
+                    append({
+                      id: Math.random(),
+                      isNew: true,
+                      name: `Area ${fields ? fields.length + 1 : 1}`,
+                      color: 'red',
+                      verticles: calculatePolygonVerticles(context.options.lat, context.options.lng),
+                    });
+                  }}
+                  variant="secondary"
+                  size="sm"
+                  icon="plus"
                 >
                   Add area
                 </Button>
               </>
             )}
           </FieldArray>
-          <Button type="submit" variant="secondary" size='sm'>Save</Button>
+          <Button type="submit" variant="secondary" size="sm">
+            Save
+          </Button>
         </div>
       )}
     </Form>
-  )
+  );
 };
