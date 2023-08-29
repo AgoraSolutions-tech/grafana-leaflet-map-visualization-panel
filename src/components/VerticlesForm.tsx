@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Button, FieldArray, HorizontalGroup, Input, Label, useStyles2 } from '@grafana/ui';
 import { css } from '@emotion/css';
+import { uniqueId } from 'helpers';
 
 interface Props {
   control: any;
@@ -18,6 +19,10 @@ const getSyles = () => {
       position: relative;
       top: 20px;
     `,
+    verticlesLabel: css`
+      position: relative;
+      left: -25px;
+    `
   };
 };
 
@@ -36,6 +41,7 @@ export const VerticlesForm = ({ control, register, index, initialIsOpen = false 
         onClick={() => setIsOpen(!isOpen)}
         icon={isOpen ? 'angle-up' : 'angle-down'}
         tooltip={isOpen ? 'Hide verticles' : ''}
+        className={isOpen ? styles.verticlesLabel : ''}
       >
         {verticlesButtonText}
       </Button>
@@ -89,7 +95,7 @@ export const VerticlesForm = ({ control, register, index, initialIsOpen = false 
                 style={{ marginRight: '1rem' }}
                 onClick={() =>
                   append({
-                    id: Math.random(),
+                    id: uniqueId(),
                     lat: fields[fields.length - 1].lat,
                     lng: fields[fields.length - 1].lng,
                   })

@@ -15,6 +15,7 @@ import {
 import { FieldValues } from 'react-hook-form';
 import { VerticlesForm } from './VerticlesForm';
 import { css } from '@emotion/css';
+import { uniqueId } from 'helpers';
 
 type PolygonEditorProps = StandardEditorProps<{ isTooltipSticky: boolean; areas: Area[] }>;
 
@@ -114,7 +115,7 @@ export const PolygonEditor = ({ value, onChange, context }: PolygonEditorProps) 
                   style={{ marginRight: '1rem' }}
                   onClick={() => {
                     append({
-                      id: Math.random(),
+                      id: uniqueId(),
                       isNew: true,
                       name: `Area ${fields ? fields.length + 1 : 1}`,
                       color: 'red',
