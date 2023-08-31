@@ -49,7 +49,6 @@ export const MapComponent: React.FC<Props> = ({ options, width, height, data }) 
 
     const existingBoat = acc.find((boat) => boat.id === currBoat.id);
     if (existingBoat) {
-      acc;
       existingBoat.positions.push(newPosition);
       return acc;
     }
