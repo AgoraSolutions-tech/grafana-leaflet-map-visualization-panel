@@ -28,41 +28,40 @@ export const MapComponent: React.FC<Props> = ({ options, width, height, data }) 
     options.lat = position.lat;
     options.lng = position.lng;
   };
-  
+
   const query = options.boatQuery;
+  const boatsData = data.series.find((s) => s.refId === query)?.fields || [];
 
-  const boatsData = data.series.find(s => s.refId === query)?.fields || [];
-  const boatIds = boatsData.find((field) => field.name === 'id')?.values.map((id) => id) || [];
-  const boatNames = boatsData.find((field) => field.name === 'name')?.values.map((name) => name) || [];
-  const boatLatitudes = boatsData.find((field) => field.name === "latitude")?.values.map((latitude) => latitude) || [];
-  const boatLongitudes = boatsData.find((field) => field.name === 'longitude')?.values.map((longitude) => longitude) || [];
-  const boatTimestamp = boatsData.find((field) => field.name === 'timestamp')?.values.map((timestamp) => timestamp) || [];
+  const queryBoats = boatsData[0].values.map((record, index) => ({
+    id: boatsData.find((field) => field.name === 'id')?.values.map((id) => id)[index],
+    name: boatsData.find((field) => field.name === 'name')?.values.map((name) => name)[index],
+    latitude: boatsData.find((field) => field.name === 'latitude')?.values.map((latitude) => latitude)[index],
+    longitude: boatsData.find((field) => field.name === 'longitude')?.values.map((longitude) => longitude)[index],
+    timestamp: boatsData.find((field) => field.name === 'timestamp')?.values.map((timestamp) => timestamp)[index],
+  }));
 
-  const boats: Boat[] = [];
-  for(let i = 0; i < boatIds.length; i++) {
-    const existingBoat = boats.find(boat => boat.id === boatIds[i]);
-
-    if (!existingBoat) {
-      const boat: Boat = {
-        id: boatIds[i],
-        name: boatNames[i],
-        positions: [{
-          timestamp: new Date(boatTimestamp[i]),
-          lat: boatLatitudes[i],
-          lng: boatLongitudes[i]
-        }]
-      }
-      boats.push(boat)
+  const boats = queryBoats.reduce((acc: Boat[], currBoat) => {
+    const newPosition = {
+      timestamp: new Date(currBoat.timestamp),
+      lat: currBoat.latitude,
+      lng: currBoat.longitude,
     };
 
-    if(existingBoat) {
-      boats.find(boat =>boat.id === existingBoat.id)?.positions.push({
-      timestamp: new Date(boatTimestamp[i]),
-      lat: boatLatitudes[i],
-      lng: boatLongitudes[i]
-    })
+    const existingBoat = acc.find((boat) => boat.id === currBoat.id);
+    if (existingBoat) {
+      acc;
+      existingBoat.positions.push(newPosition);
+      return acc;
     }
-  };
+
+    const newBoat = {
+      id: currBoat.id,
+      name: currBoat.name,
+      positions: [newPosition],
+    };
+
+    return [...acc, newBoat];
+  }, []);
 
   return (
     <MapContainer
@@ -95,7 +94,10 @@ export const MapComponent: React.FC<Props> = ({ options, width, height, data }) 
       })}
       {boats &&
         boats.map((boat) => {
-          const position = [boat.positions[boat.positions.length - 1].lat, boat.positions[boat.positions.length - 1].lng] as LatLngExpression;
+          const position = [
+            boat.positions[boat.positions.length - 1].lat,
+            boat.positions[boat.positions.length - 1].lng,
+          ] as LatLngExpression;
           return <Marker key={boat.id} position={position} />;
         })}
     </MapContainer>

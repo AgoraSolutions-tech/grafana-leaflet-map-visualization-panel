@@ -12,8 +12,7 @@ export interface ItemCollection {
   lat: number;
   lng: number;
 }
-
-export interface Boat {
+ export interface Boat {
   id: number;
   name: string;
   positions: {
