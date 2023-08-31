@@ -5,8 +5,6 @@ import React from "react";
 import { ItemCollection } from "types";
 
 type EditorProps = StandardEditorProps<ItemCollection[]>
-
-
 export const ItemEditor = ({ value, onChange, context }: EditorProps) => {
   const options = mockBoats || [];
   const itemArray = value || [];

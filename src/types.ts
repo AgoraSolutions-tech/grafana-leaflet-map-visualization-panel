@@ -1,3 +1,10 @@
+import { DataQuery } from '@grafana/schema';
+
+export type Vertex = {
+  id: number;
+  lat: number;
+  lng: number;
+};
 export interface ItemCollection {
   id: string;
   name: string;
@@ -5,10 +12,15 @@ export interface ItemCollection {
   lat: number;
   lng: number;
 }
-export type Vertex = {
+
+export interface Boat {
   id: number;
-  lat: number;
-  lng: number;
+  name: string;
+  positions: {
+    timestamp: Date;
+    lat: number;
+    lng: number;
+  }[];
 }
 export interface Area {
   id: number;
@@ -20,9 +32,17 @@ export interface Area {
 export interface MapOptions {
   lat: number;
   lng: number;
-  items: ItemCollection[];
+  boatQuery: string;
   areas: {
     isTooltipSticky: boolean;
     areas: Area[];
-  }
+  };
+}
+
+export interface MyQuery extends DataQuery {
+  id: number;
+  name: string;
+  latiutiude: number;
+  longitude: number;
+  timestamp: Date;
 }
