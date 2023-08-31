@@ -15,6 +15,11 @@ export const plugin = new PanelPlugin<MapOptions>(MapComponent).setPanelOptions(
       name: 'Longitude',
       defaultValue: 17.03483998297049
     })
+    .addTextInput({
+      category: ['Query'],
+      path: 'boatQuery',
+      name: 'Named boat query'
+    })
     .addCustomEditor({
       category: ['Areas'],
       id: 'areas',

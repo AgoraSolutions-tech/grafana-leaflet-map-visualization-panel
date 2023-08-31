@@ -1,0 +1,7 @@
+[
+    {"id":1, "name": "Boat1", "latitude":51.1231, "longitude":41.1231},
+    {"id":2, "name":"Boat2", "latitude":52.1231, "longitude":41.1231},
+    {"id":3, "name":"Boat3", "latitude": 53.1231, "longitude": 41.1231},
+    {"id": 4, "name": "Boat4", "latitude": 54.1231, "longitude": 41.1231},
+    {"id": 5, "name": "Boat5", "latitude": 55.1231, "longitude": 41.1231}
+]

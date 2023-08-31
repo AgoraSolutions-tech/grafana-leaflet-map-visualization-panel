@@ -23,7 +23,7 @@ const getSyles = () => {
   return {
     tooltipWrapper: css`
       margin-bottom: 25px;
-    `
+    `,
   };
 };
 
