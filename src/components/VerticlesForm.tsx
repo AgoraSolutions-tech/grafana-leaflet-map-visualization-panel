@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
-import { Button, FieldArray, HorizontalGroup, Input, Label, useStyles2 } from '@grafana/ui';
+import { Button, HorizontalGroup, Input, Label, useStyles2 } from '@grafana/ui';
 import { css } from '@emotion/css';
 import { uniqueId } from 'helpers';
+import { Control, useFieldArray } from 'react-hook-form';
+import { Area } from 'types';
 
 interface Props {
-  control: any;
+  control: Control<{ areas: Area[]; isTooltipSticky: boolean }>;
   register: any;
   index: number;
   initialIsOpen?: boolean;
@@ -32,6 +34,8 @@ export const VerticlesForm = ({ control, register, index, initialIsOpen = false 
 
   const verticlesButtonText = isOpen ? 'Verticles:' : 'Show verticles';
 
+  const { append, fields, remove } = useFieldArray({ control, name: `areas.${index}.verticles`})
+
   return (
     <>
       <Button
@@ -46,9 +50,6 @@ export const VerticlesForm = ({ control, register, index, initialIsOpen = false 
         {verticlesButtonText}
       </Button>
       <div style={{ display: isOpen ? 'block' : 'none' }}>
-        <FieldArray control={control} name={`areas.${index}.verticles`}>
-          {({ append, fields, remove }) => (
-            <>
               <div style={{ marginBottom: '1rem' }}>
                 {fields.map((vertex, vertexIndex) => (
                   <div key={vertex.id}>
@@ -106,9 +107,6 @@ export const VerticlesForm = ({ control, register, index, initialIsOpen = false 
               >
                 Add vertex
               </Button>
-            </>
-          )}
-        </FieldArray>
       </div>
     </>
   );
