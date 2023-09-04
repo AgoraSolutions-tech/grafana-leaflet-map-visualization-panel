@@ -15,6 +15,11 @@ export const plugin = new PanelPlugin<MapOptions>(MapComponent).setPanelOptions(
       name: 'Longitude',
       defaultValue: 17.03483998297049
     })
+    .addNumberInput({
+      path: 'zoom',
+      name: 'Zoom',
+      defaultValue: 15
+    })
     .addTextInput({
       category: ['Query'],
       path: 'boatQuery',

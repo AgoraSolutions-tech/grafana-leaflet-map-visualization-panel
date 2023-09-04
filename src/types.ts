@@ -25,12 +25,14 @@ export interface Area {
   id: number;
   name: string;
   color: string;
+  isNew?: boolean;
   verticles: Vertex[];
 }
 
 export interface MapOptions {
   lat: number;
   lng: number;
+  zoom: number;
   boatQuery: string;
   areas: {
     isTooltipSticky: boolean;

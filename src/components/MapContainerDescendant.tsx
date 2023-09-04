@@ -9,7 +9,7 @@ export const MapContainerDescendant = (props: Props) => {
     moveend: () => {
       const newCenter = map.getCenter();
       props.onPositionChange({ lng: newCenter.lng, lat: newCenter.lat });
-    },
+    }
   });
   return null;
 };
