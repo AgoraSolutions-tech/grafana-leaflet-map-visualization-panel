@@ -25,6 +25,7 @@ export interface Area {
   id: number;
   name: string;
   color: string;
+  isNew?: boolean;
   verticles: Vertex[];
 }
 

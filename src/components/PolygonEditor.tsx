@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { StandardEditorProps } from '@grafana/data';
 import { Area } from 'types';
 import { Button, ColorPicker, HorizontalGroup, InlineSwitch, Input, Label, useStyles2 } from '@grafana/ui';
@@ -32,7 +32,7 @@ export const PolygonEditor = ({ value, onChange, context, ...rest }: PolygonEdit
           color: area.color,
           verticles: area.verticles,
         };
-      }),
+      }).filter(area => area !== null),
       isTooltipSticky: value?.isTooltipSticky || false,
     };
   }, [value]);
@@ -52,10 +52,6 @@ export const PolygonEditor = ({ value, onChange, context, ...rest }: PolygonEdit
       { lat: lat + diff, lng: lng + diff, id: Math.random() },
     ];
   };
-
-  // useEffect(() => {
-  //   setValue('areas', value.areas);
-  // }, [value]);
 
   return (
     <form

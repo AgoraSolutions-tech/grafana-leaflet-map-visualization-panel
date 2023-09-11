@@ -22,8 +22,8 @@ const getStyles = () => {
 export const MapComponent: React.FC<Props> = ({ options, width, height, data }) => {
   const mapCenter: LatLngExpression = [options.lat, options.lng];
   const styles = useStyles2(getStyles);
-  const areas = options.areas.areas || [];
-  const isSticky = options.areas.isTooltipSticky;
+  const areas = options.areas?.areas || [];
+  const isSticky = options.areas?.isTooltipSticky;
   const handleMapPositionChange = (position: { lng: number; lat: number }) => {
     options.lat = position.lat;
     options.lng = position.lng;
@@ -32,7 +32,7 @@ export const MapComponent: React.FC<Props> = ({ options, width, height, data }) 
   const query = options.boatQuery;
   const boatsData = data.series.find((s) => s.refId === query)?.fields || [];
 
-  const queryBoats = boatsData[0].values.map((record, index) => ({
+  const queryBoats = boatsData[0]?.values.map((record, index) => ({
     id: boatsData.find((field) => field.name === 'id')?.values.map((id) => id)[index],
     name: boatsData.find((field) => field.name === 'name')?.values.map((name) => name)[index],
     latitude: boatsData.find((field) => field.name === 'latitude')?.values.map((latitude) => latitude)[index],
@@ -40,7 +40,7 @@ export const MapComponent: React.FC<Props> = ({ options, width, height, data }) 
     timestamp: boatsData.find((field) => field.name === 'timestamp')?.values.map((timestamp) => timestamp)[index],
   }));
 
-  const boats = queryBoats.reduce((acc: Boat[], currBoat) => {
+  const boats = (queryBoats || []).reduce((acc: Boat[], currBoat) => {
     const newPosition = {
       timestamp: new Date(currBoat.timestamp),
       lat: currBoat.latitude,
