@@ -32,7 +32,7 @@ export const PolygonEditor = ({ value, onChange, context }: PolygonEditorProps) 
           color: area.color,
           verticles: area.verticles,
         };
-      }),
+      }).filter(area => area !== null),
       isTooltipSticky: value?.isTooltipSticky || false,
     };
   }, [value]);

@@ -35,6 +35,7 @@ export const MapComponent: React.FC<Props> = ({ options, width, height, data, on
     iconUrl: require('../img/boat-pin.svg'),
     iconSize: [40, 40],
   });
+  
 
   const query = options.boatQuery;
   const boatsData = data.series.find((s) => s.refId === query)?.fields || [];
