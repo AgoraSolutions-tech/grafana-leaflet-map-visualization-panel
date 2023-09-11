@@ -105,7 +105,7 @@ export const VerticlesForm = ({ control, register, index, initialIsOpen = false 
                 variant="secondary"
                 size="sm"
                 icon="plus"
-                tooltip={"Add new vertex"}
+                tooltip={"Add a new vertex"}
              >
                 Add vertex
               </Button>
