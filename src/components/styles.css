@@ -1,3 +1,7 @@
 .leaflet-container {
     height: 100%;
 }
+
+.leaflet-popup-pane, .leaflet-control {
+    cursor: pointer !important;
+}
