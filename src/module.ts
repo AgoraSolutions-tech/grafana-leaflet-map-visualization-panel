@@ -7,13 +7,18 @@ export const plugin = new PanelPlugin<MapOptions>(MapComponent).setPanelOptions(
   builder
     .addNumberInput({
       path: 'lat',
-      name: 'Latitude',
+      name: 'Center latitude',
       defaultValue: 51.11030747949518,
     })
     .addNumberInput({
       path: 'lng',
-      name: 'Longitude',
+      name: 'Center longitude',
       defaultValue: 17.03483998297049
+    })
+    .addNumberInput({
+      path: 'zoom',
+      name: 'Zoom',
+      defaultValue: 15
     })
     .addTextInput({
       category: ['Query'],

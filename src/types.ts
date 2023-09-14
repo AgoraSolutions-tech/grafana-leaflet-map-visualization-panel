@@ -15,34 +15,36 @@ export interface ItemCollection {
  export interface Boat {
   id: number;
   name: string;
-  positions: {
+  positions: Array<{
     timestamp: Date;
     lat: number;
     lng: number;
-  }[];
+  }>;
 }
 export interface Area {
   id: number;
   name: string;
   color: string;
   isNew?: boolean;
-  verticles: Vertex[];
+  verticles: Array<Vertex>;
 }
 
 export interface MapOptions {
   lat: number;
   lng: number;
   boatQuery: string;
+  zoom: number;
   areas: {
     isTooltipSticky: boolean;
-    areas: Area[];
+    areas: Array<Area>;
   };
-}
+} 
 
 export interface MyQuery extends DataQuery {
   id: number;
   name: string;
   latiutiude: number;
   longitude: number;
+  zoom: number;
   timestamp: Date;
 }

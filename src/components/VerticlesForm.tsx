@@ -6,7 +6,7 @@ import { Control, useFieldArray } from 'react-hook-form';
 import { Area } from 'types';
 
 interface Props {
-  control: Control<{ areas: Area[]; isTooltipSticky: boolean }>;
+  control: Control<{ areas: Array<Area>; isTooltipSticky: boolean }>;
   register: any;
   index: number;
   initialIsOpen?: boolean;
@@ -24,7 +24,7 @@ const getSyles = () => {
     verticlesLabel: css`
       position: relative;
       left: -25px;
-    `
+    `,
   };
 };
 
@@ -44,7 +44,7 @@ export const VerticlesForm = ({ control, register, index, initialIsOpen = false 
         fill={isOpen ? 'text' : 'outline'}
         onClick={() => setIsOpen(!isOpen)}
         icon={isOpen ? 'angle-up' : 'angle-down'}
-        tooltip={isOpen ? 'Hide verticles' : ''}
+        tooltip={isOpen ? 'Hide verticles' : "Show all area's verticles"}
         className={isOpen ? styles.verticlesLabel : ''}
       >
         {verticlesButtonText}
@@ -85,6 +85,7 @@ export const VerticlesForm = ({ control, register, index, initialIsOpen = false 
                           variant="secondary"
                           size="sm"
                           fill="text"
+                          tooltip={"Remove this vertex"}
                           className={vertexIndex === 0 ? styles.firstVertex : ''}
                         />
                       </HorizontalGroup>
@@ -104,7 +105,8 @@ export const VerticlesForm = ({ control, register, index, initialIsOpen = false 
                 variant="secondary"
                 size="sm"
                 icon="plus"
-              >
+                tooltip={"Add a new vertex"}
+             >
                 Add vertex
               </Button>
       </div>
