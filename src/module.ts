@@ -22,8 +22,8 @@ export const plugin = new PanelPlugin<MapOptions>(MapComponent).setPanelOptions(
     })
     .addTextInput({
       category: ['Query'],
-      path: 'boatQuery',
-      name: 'Named boat query'
+      path: 'objectQuery',
+      name: 'Object query name'
     })
     .addCustomEditor({
       category: ['Areas'],

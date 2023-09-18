@@ -1,13 +1,14 @@
 {
   "$schema": "https://raw.githubusercontent.com/grafana/grafana/master/docs/sources/developers/plugins/plugin.schema.json",
   "type": "panel",
-  "name": "Map",
+  "name": "Leaflet Map Visualisation",
   "id": "agora-map-panel",
   "info": {
-    "keywords": ["panel"],
-    "description": "",
+    "keywords": ["panel", "map", "Leaflet", "drawing polygons", "areas", "location tracking"],
+    "description": "A tool enables users to create interactive maps, draw polygons, real-time management of geolocation data for objects, and displaying historical positions.",
     "author": {
-      "name": "Agora"
+      "name": "Agora Solutions",
+      "url": "https://www.agorasolutions.tech/"
     },
     "logos": {
       "small": "img/logo.svg",

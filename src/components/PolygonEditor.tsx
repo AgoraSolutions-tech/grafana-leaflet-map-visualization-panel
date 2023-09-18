@@ -5,20 +5,12 @@ import { Button, ColorPickerInput, HorizontalGroup, InlineSwitch, Input, Label, 
 import { FieldValues, useFieldArray, useForm } from 'react-hook-form';
 import { VerticlesForm } from './VerticlesForm';
 import { uniqueId } from 'helpers';
-import { css } from '@emotion/css';
+import { PolygonEditorStyles } from './style';
 
 type PolygonEditorProps = StandardEditorProps<{ isTooltipSticky: boolean; areas: Array<Area> }>;
 
-const getSyles = () => {
-  return {
-    tooltipWrapper: css`
-      margin-bottom: 25px;
-    `,
-  };
-};
-
 export const PolygonEditor = ({ value, onChange, context }: PolygonEditorProps) => {
-  const styles = useStyles2(getSyles);
+  const styles = useStyles2(PolygonEditorStyles);
   const prevValue = useRef<any>();
 
   const initialValues = useMemo<FieldValues>(() => {
