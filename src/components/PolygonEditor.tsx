@@ -75,7 +75,13 @@ export const PolygonEditor = ({ value, onChange, context }: PolygonEditorProps) 
     <form onSubmit={handleSubmit(onSubmit)}>
       <div>
         <div className={styles.tooltipWrapper}>
-          <InlineSwitch showLabel={true} {...register(`isTooltipSticky` as const)} label="Show area names" />
+          <InlineSwitch 
+            showLabel={true} {...register(`isTooltipSticky` as const)} 
+            label={watch(`isTooltipSticky`) 
+              ? "Always show area names"
+              : "Show area names on hover"
+            } 
+          />
         </div>
         <div style={{ marginBottom: '1rem' }}>
           {fields.map((field, index) => (

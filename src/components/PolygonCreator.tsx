@@ -1,6 +1,6 @@
-import { isPointInPoly, uniqueId } from 'helpers';
+import { uniqueId } from 'helpers';
 import { FeatureGroup, Polygon, Tooltip } from 'react-leaflet';
-import React, { useState } from 'react';
+import React from 'react';
 import { EditControl } from 'react-leaflet-draw';
 import { Area, MapOptions, MovingObject, Vertex } from 'types';
 import { urlUtil } from '@grafana/data';
@@ -11,11 +11,10 @@ interface Props {
   onOptionsChange: (options: MapOptions) => void;
   options: MapOptions;
   objects: MovingObject[];
+  controlKey: number;
 }
 
 export const PolygonCreator = (props: Props) => {
-  const [editContolKey, setEditControlKey] = useState(uniqueId());
-
   const styles = useStyles2(PolygonCreatorStyles);
   const areas = props.options.areas.areas;
   const params = urlUtil.getUrlSearchParams();
@@ -32,6 +31,7 @@ export const PolygonCreator = (props: Props) => {
       const newVerticles = _latlngs[0];
       props.onOptionsChange({
         ...props.options,
+        controlKey: uniqueId(),
         areas: {
           ...props.options.areas,
           areas: [
@@ -49,7 +49,6 @@ export const PolygonCreator = (props: Props) => {
           ],
         },
       });
-      setEditControlKey(uniqueId());
     }
   };
 
@@ -90,12 +89,12 @@ export const PolygonCreator = (props: Props) => {
 
     props.onOptionsChange({
       ...props.options,
+      controlKey: uniqueId(),
       areas: {
         ...props.options.areas,
         areas: newAreas,
       },
     });
-    setEditControlKey(uniqueId());
   };
 
   const onDeleted = (e: any) => {
@@ -121,19 +120,18 @@ export const PolygonCreator = (props: Props) => {
 
     props.onOptionsChange({
       ...props.options,
+      controlKey: uniqueId(),
       areas: {
         ...props.options.areas,
         areas: newAreas,
       },
     });
-    setEditControlKey(uniqueId());
   };
 
   return (
-    <FeatureGroup>
+    <FeatureGroup  key={props.controlKey}>
       {isEditMode && (
         <EditControl
-          key={editContolKey}
           position="topright"
           onCreated={onCreated}
           onEdited={onEdited}
@@ -147,16 +145,7 @@ export const PolygonCreator = (props: Props) => {
           }}
         />
       )}
-      {areas.map((area: Area) => {
-        const pointsInsidePoly: String[] = [];
-        const areaVerticles = area.verticles.map((vertex) => [vertex.lat, vertex.lng]);
-        {
-          props.objects.map((object) => {
-            if (isPointInPoly(areaVerticles, [object.positions[0].lat, object.positions[0].lng])) {
-              pointsInsidePoly.push(object.name);
-            }
-          });
-        }
+      {areas.map((area: Area) => {        
         return (
           <div key={area.id}>
             <Polygon
@@ -174,10 +163,7 @@ export const PolygonCreator = (props: Props) => {
                   permanent={props.options.areas.isTooltipSticky}
                   direction="center"
                   className={styles.styledTooltip}
-                >
-                  <p className={styles.tooltipTitle}>{area.name}</p>
-                  {pointsInsidePoly.length > 0 && <p className={styles.title}>Inside: {pointsInsidePoly.join(', ')}</p>}
-                </Tooltip>
+                />
               )}
             </Polygon>
           </div>

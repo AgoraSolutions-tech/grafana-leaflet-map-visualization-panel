@@ -35,6 +35,7 @@ export interface MapOptions {
   objectQuery: string;
   zoom: number;
   isTailVisible: boolean;
+  controlKey: number;
   areas: {
     isTooltipSticky: boolean;
     areas: Array<Area>;
