@@ -8,17 +8,17 @@ export const plugin = new PanelPlugin<MapOptions>(MapComponent).setPanelOptions(
     .addNumberInput({
       path: 'lat',
       name: 'Center latitude',
-      defaultValue: 51.11030747949518,
+      defaultValue: 53.5,
     })
     .addNumberInput({
       path: 'lng',
       name: 'Center longitude',
-      defaultValue: 17.03483998297049
+      defaultValue: 3
     })
     .addNumberInput({
       path: 'zoom',
       name: 'Zoom',
-      defaultValue: 15
+      defaultValue: 5
     })
     .addTextInput({
       category: ['Query'],
