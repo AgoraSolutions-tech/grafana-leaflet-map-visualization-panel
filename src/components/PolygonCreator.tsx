@@ -145,8 +145,8 @@ export const PolygonCreator = (props: Props) => {
           }}
         />
       )}
-      {areas.map((area: Area) => {        
-        return (
+      {areas.map((area: Area) => {   
+       return (
           <div key={area.id}>
             <Polygon
               positions={area.verticles}
@@ -163,7 +163,9 @@ export const PolygonCreator = (props: Props) => {
                   permanent={props.options.areas.isTooltipSticky}
                   direction="center"
                   className={styles.styledTooltip}
-                />
+                >
+                     {area.name}
+                </Tooltip>
               )}
             </Polygon>
           </div>

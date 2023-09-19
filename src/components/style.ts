@@ -5,12 +5,6 @@ export const MapContainesStyles = () => {
       wrapper: css`
         font-family: Open Sans;
       `,
-      styledTooltip: css`
-        background: none !important;
-        border: none !important;
-        box-shadow: none !important;
-        text-align: center;
-      `,
       tooltipTitle: css`
         font-weight: 800;
         font-size: 18px;
@@ -52,12 +46,15 @@ export const MapContainesStyles = () => {
 
   export const PolygonCreatorStyles = () => {
     return {
-        styledTooltip: css`
-          background: none !important;
-          border: none !important;
-          box-shadow: none !important;
-          text-align: center;
-        `,
+      styledTooltip: css`
+        background: none !important;
+        border: none !important;
+        box-shadow: none !important;
+        text-align: center;
+        font-weight: 800;
+        font-size: 18px;
+        text-shadow: 1px 1px 2px white;
+      `,
         tooltipTitle: css`
         font-weight: 800;
         font-size: 18px;
