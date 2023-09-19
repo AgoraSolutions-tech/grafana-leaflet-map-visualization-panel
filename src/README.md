@@ -1,7 +1,7 @@
 # Leaflet Map Vizualization
-![Dashboard](/docs/dashboard.png)
+![Dashboard](https://github.com/AgoraSolutions-tech/grafana-leaflet-map-visualization-panel/blob/main/docs/areas-tab.png)
 
-![Edit-panel](/docs/edit-panel.png)
+![Edit-panel](https://github.com/AgoraSolutions-tech/grafana-leaflet-map-visualization-panel/blob/main/docs/edit-panel.png)
 ## About 
 
 Leaflet Map Visualization is a panel used for creating polygons on a world map and displaying moving objects. Location of the objects over time comes from a query.
@@ -39,7 +39,7 @@ These settings are responsible for connecting the plugin to the query. There sho
 
 
 ### Areas settings
-![Areas tab](/docs/areas-tab.png)
+![Areas tab](https://github.com/AgoraSolutions-tech/grafana-leaflet-map-visualization-panel/blob/main/docs/areas-tab.png)
 
 All changes in the areas settings should be finalized by clicking the "save" button in the areas tab.
 
