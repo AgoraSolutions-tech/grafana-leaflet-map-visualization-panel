@@ -102,7 +102,7 @@ export const MapComponent: React.FC<Props> = ({ options, width, height, data, on
             position.lng,
           ]) as Array<LatLngExpression>;
           let areasArr: String[] = [];
-          options.areas.areas.map((area: Area) => {
+          options.areas?.areas.map((area: Area) => {
             const areaVerticles = area.verticles.map((vertex: Vertex) => [vertex.lat, vertex.lng]);
             if (isPointInPoly(areaVerticles, [object.positions[0].lat, object.positions[0].lng])) {
               areasArr.push(area.name);
