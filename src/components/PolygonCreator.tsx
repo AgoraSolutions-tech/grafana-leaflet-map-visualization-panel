@@ -16,7 +16,7 @@ interface Props {
 
 export const PolygonCreator = (props: Props) => {
   const styles = useStyles2(PolygonCreatorStyles);
-  const areas = props.options.areas.areas;
+  const areas = props.options.areas?.areas;
   const params = urlUtil.getUrlSearchParams();
   const isEditMode = !!params.editPanel;
 
@@ -35,10 +35,10 @@ export const PolygonCreator = (props: Props) => {
         areas: {
           ...props.options.areas,
           areas: [
-            ...areas,
+            ...areas || [],
             {
               id: uniqueId(),
-              name: `Area ${props.options.areas.areas.length + 1}`,
+              name:  `Area ${props.options.areas?.areas ? props.options.areas?.areas.length + 1 : 1}`,
               color: 'red',
               verticles: newVerticles.map((vertex: Vertex) => ({
                 id: uniqueId(),
@@ -145,7 +145,7 @@ export const PolygonCreator = (props: Props) => {
           }}
         />
       )}
-      {areas.map((area: Area) => {   
+      {(areas || []).map((area: Area) => {   
        return (
           <div key={area.id}>
             <Polygon
