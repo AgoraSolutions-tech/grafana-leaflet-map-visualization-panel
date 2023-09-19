@@ -1,7 +1,7 @@
 {
-  "name": "map",
+  "name": "leaflet-map-visualization",
   "version": "1.0.0",
-  "description": "Intern project",
+  "description": "A tool enables users to create interactive maps, draw polygons, real-time management of geolocation data for objects, and displaying historical positions.",
   "scripts": {
     "build": "webpack -c ./.config/webpack/webpack.config.ts --env production",
     "dev": "webpack -w -c ./.config/webpack/webpack.config.ts --env development",
@@ -15,7 +15,7 @@
     "server": "docker-compose up --build",
     "sign": "npx --yes @grafana/sign-plugin@latest"
   },
-  "author": "Agora",
+  "author": "Agora Solutions",
   "license": "Apache-2.0",
   "devDependencies": {
     "@babel/core": "^7.21.4",

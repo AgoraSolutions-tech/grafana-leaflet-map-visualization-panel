@@ -1,5 +1,7 @@
 # Leaflet Map Vizualization
+![Dashboard](https://github.com/AgoraSolutions-tech/grafana-leaflet-map-visualization-panel/docs/dashboard.png)
 
+![Edit-panel](https://github.com/AgoraSolutions-tech/grafana-leaflet-map-visualization-panel/docs/edit-panel.png)
 ## About 
 
 Leaflet Map Visualization is a panel used for creating polygons on a world map and displaying moving objects. Location of the objects over time comes from a query.
@@ -22,7 +24,7 @@ In order to display a moving object on the map, the plugin requires the followin
   id,name,timestamp,latitude,longitude
   object-id,object-name,2023-09-18 00:00:00,54.075505722248174,1.9995117187500002
 ```
-## Map Option Settings
+### Map Option Settings
 
 **Center latitude and center longitude**
 This settings configures the default center of the map.
@@ -30,13 +32,14 @@ This settings configures the default center of the map.
 **Zoom**
 The initial zoom factor for the map. This is a value between 1 and 18 where 1 is the most zoomed out.
 
-
 ### Query settings
 
 **Object query name**
 These settings are responsible for connecting the plugin to the query. There should be exactly the same name as the query name with information about the object's location.
 
+
 ### Areas settings
+![Areas tab](https://github.com/AgoraSolutions-tech/grafana-leaflet-map-visualization-panel/docs/areas-tab.png)
 
 All changes in the areas settings should be finalized by clicking the "save" button in the areas tab.
 
@@ -56,7 +59,7 @@ When you open the editing panel with existing areas, their vertices will be hidd
 
 After making the changes, click on the "Save" button in the Areas tab.
 
-## Areas creator 
+### Areas creator 
 
 Areas can also be created, edited, and deleted using controls on the map. 
 
@@ -75,6 +78,6 @@ This option allows you to edit multiple areas at once. After finishing the editi
 **Remove areas**
 By clicking on the trash can icon, you can select the areas you want to delete. You can also choose the 'Clear all' option to remove all areas from the list. After selecting the 'Save' button, the changes will be updated. To discard the changes, choose the 'Cancel' option.
 
-## Trail visibility
+### Trail visibility
 
 After pressing the 'Trail' button, you can toggle the visibility of historical positions of objects on and off. This button will also be visible from the dashboard.
