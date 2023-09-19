@@ -1,47 +1,66 @@
-import React, { useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { StandardEditorProps } from '@grafana/data';
 import { Area } from 'types';
-import { Button, ColorPicker, HorizontalGroup, InlineSwitch, Input, Label, useStyles2 } from '@grafana/ui';
+import { Button, ColorPickerInput, HorizontalGroup, InlineSwitch, Input, Label, useStyles2 } from '@grafana/ui';
 import { FieldValues, useFieldArray, useForm } from 'react-hook-form';
 import { VerticlesForm } from './VerticlesForm';
 import { uniqueId } from 'helpers';
-import { css } from '@emotion/css';
+import { PolygonEditorStyles } from './style';
 
-type PolygonEditorProps = StandardEditorProps<{ isTooltipSticky: boolean; areas: Area[] }>;
-
-const getSyles = () => {
-  return {
-    tooltipWrapper: css`
-      margin-bottom: 25px;
-    `,
-  };
-};
+type PolygonEditorProps = StandardEditorProps<{ isTooltipSticky: boolean; areas: Array<Area> }>;
 
 export const PolygonEditor = ({ value, onChange, context }: PolygonEditorProps) => {
-  const styles = useStyles2(getSyles);
+  const styles = useStyles2(PolygonEditorStyles);
+  const prevValue = useRef<any>();
 
   const initialValues = useMemo<FieldValues>(() => {
     return {
-      areas: (value?.areas || []).map((area) => {
-        if (!area) {
-          return null;
-        }
-        return {
-          id: area.id,
-          name: area.name,
-          color: area.color,
-          verticles: area.verticles,
-        };
-      }).filter(area => area !== null),
+      areas: (value?.areas || [])
+        .map((area) => {
+          if (!area) {
+            return null;
+          }
+          return {
+            id: area.id,
+            name: area.name,
+            color: area.color,
+            verticles: area.verticles,
+          };
+        })
+        .filter((area) => area !== null),
       isTooltipSticky: value?.isTooltipSticky || false,
     };
   }, [value]);
 
-  const { control, register, watch, setValue, handleSubmit } = useForm<{ areas: Area[]; isTooltipSticky: boolean }>({
+  const { control, register, watch, setValue, handleSubmit } = useForm<{
+    areas: Array<Area>;
+    isTooltipSticky: boolean;
+  }>({
     defaultValues: initialValues,
+    mode: 'all',
   });
 
-  const { append, fields, remove } = useFieldArray({ control, name: 'areas' });
+  const { append, fields, remove, replace } = useFieldArray({ control, name: 'areas' });
+
+  useEffect(() => {
+    prevValue.current = value?.areas;
+    replace(value?.areas);
+  }, [value, replace]);
+
+  const onSubmit = useCallback(
+    (values: { areas: Array<Area>; isTooltipSticky: boolean }) => {
+      onChange({
+        isTooltipSticky: values.isTooltipSticky,
+        areas: values.areas.map((v: Area) => ({
+          id: v.id,
+          name: v.name,
+          color: v.color,
+          verticles: v.verticles,
+        })),
+      });
+    },
+    [onChange]
+  );
 
   const calculatePolygonVerticles = (lat: number, lng: number) => {
     const diff = 0.001;
@@ -53,22 +72,16 @@ export const PolygonEditor = ({ value, onChange, context }: PolygonEditorProps) 
     ];
   };
   return (
-    <form
-      onSubmit={handleSubmit((values) => {
-        onChange({
-          isTooltipSticky: values.isTooltipSticky,
-          areas: values.areas.map((v: Area) => ({
-            id: v.id,
-            name: v.name,
-            color: v.color,
-            verticles: v.verticles,
-          })),
-        });
-      })}
-    >
+    <form onSubmit={handleSubmit(onSubmit)}>
       <div>
         <div className={styles.tooltipWrapper}>
-          <InlineSwitch showLabel={true} {...register(`isTooltipSticky` as const)}  label='Show area names' />
+          <InlineSwitch 
+            showLabel={true} {...register(`isTooltipSticky` as const)} 
+            label={watch(`isTooltipSticky`) 
+              ? "Always show area names"
+              : "Show area names on hover"
+            } 
+          />
         </div>
         <div style={{ marginBottom: '1rem' }}>
           {fields.map((field, index) => (
@@ -77,24 +90,31 @@ export const PolygonEditor = ({ value, onChange, context }: PolygonEditorProps) 
               <HorizontalGroup>
                 <div>
                   <Label>Name</Label>
-                  <Input {...register(`areas.${index}.name` as const)} defaultValue={field.name} placeholder='Enter the area name' />
+                  <Input
+                    {...register(`areas.${index}.name` as const)}
+                    defaultValue={field.name}
+                    placeholder="Enter the area name"
+                  />
                 </div>
                 <div>
                   <Label>Color</Label>
-                  <Input
-                    prefix={
-                      <ColorPicker
-                        color={watch(`areas.${index}.color`) || 'red'}
-                        onChange={(color) => {
-                          setValue(`areas.${index}.color`, color);
-                        }}
-                      />
-                    }
-                    {...register(`areas.${index}.color` as const)}
+                  <ColorPickerInput
+                    value={watch(`areas.${index}.color`)}
                     defaultValue={field.color}
+                    {...register(`areas.${index}.color` as const)}
+                    onChange={(color) => {
+                      setValue(`areas.${index}.color`, color);
+                    }}
                   />
                 </div>
-                <Button variant="secondary" size="lg" fill="text" icon="x" onClick={() => remove(index)} tooltip='Remove the area'/>
+                <Button
+                  variant="secondary"
+                  size="lg"
+                  fill="text"
+                  icon="x"
+                  onClick={() => remove(index)}
+                  tooltip="Remove the area"
+                />
               </HorizontalGroup>
               <br />
               <VerticlesForm initialIsOpen={field.isNew} control={control} register={register} index={index} />
@@ -116,7 +136,7 @@ export const PolygonEditor = ({ value, onChange, context }: PolygonEditorProps) 
           variant="secondary"
           size="sm"
           icon="plus"
-          tooltip={"Add new area on the center of map"}
+          tooltip={'Add new area on the center of map'}
         >
           Add area
         </Button>

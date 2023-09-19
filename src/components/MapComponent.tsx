@@ -1,54 +1,47 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { PanelProps } from '@grafana/data';
-import { TileLayer, MapContainer, Tooltip, Polygon, Marker, Polyline, Popup } from 'react-leaflet';
+import { TileLayer, MapContainer, Marker, Polyline, Popup } from 'react-leaflet';
 import L, { LatLngExpression } from 'leaflet';
-import { Area, Boat, MapOptions } from 'types';
+import { MovingObject, MapOptions, Area, Vertex } from 'types';
 import { cx, css } from '@emotion/css';
 import { useStyles2 } from '@grafana/ui';
+import { MapContainerDescendant } from './MapContainerDescendant';
+import { colorValues, isPointInPoly, shoulAddZero } from 'helpers';
+import show from '../img/show.png';
+import hide from '../img/hide.png';
 
 import 'leaflet/dist/leaflet.css';
-import { MapContainerDescendant } from './MapContainerDescendant';
+import 'leaflet-draw/dist/leaflet.draw.css';
+import './styles.css';
+import { MapContainesStyles } from './style';
+import { PolygonCreator } from './PolygonCreator';
 
 interface Props extends PanelProps<MapOptions> {}
 
-const getStyles = () => {
-  return {
-    wrapper: css`
-      font-family: Open Sans;
-    `,
-    styledTooltip: css`
-      background: none;
-      font-size: 15px;
-    `,
-  };
-};
-
 export const MapComponent: React.FC<Props> = ({ options, width, height, data, onOptionsChange }) => {
-  const styles = useStyles2(getStyles);
-  const [historyVisibility, setHistoryVisibility] = useState(false);
+  const styles = useStyles2(MapContainesStyles);
 
   const mapCenter: LatLngExpression = [options.lat, options.lng];
-  const areas = options.areas?.areas || [];
+  const tailVisibility = options.isTailVisible;
   const zoomValue = options.zoom;
-
+  const controlKey = options.controlKey;
   const boatIcon = L.icon({
     iconUrl: require('../img/boat-pin.svg'),
-    iconSize: [40, 40],
+    iconSize: [50, 50],
+    iconAnchor: [25, 45],
   });
-  
+  const query = options.objectQuery;
+  const objectData = data.series.find((s) => s.refId === query)?.fields || [];
 
-  const query = options.boatQuery;
-  const boatsData = data.series.find((s) => s.refId === query)?.fields || [];
-
-  const queryBoats = boatsData[0]?.values.map((record, index) => ({
-    id: boatsData.find((field) => field.name === 'id')?.values.map((id) => id)[index],
-    name: boatsData.find((field) => field.name === 'name')?.values.map((name) => name)[index],
-    latitude: boatsData.find((field) => field.name === 'latitude')?.values.map((latitude) => latitude)[index],
-    longitude: boatsData.find((field) => field.name === 'longitude')?.values.map((longitude) => longitude)[index],
-    timestamp: boatsData.find((field) => field.name === 'timestamp')?.values.map((timestamp) => timestamp)[index],
+  const queryObjects = objectData[0]?.values.map((record, index) => ({
+    id: objectData.find((field) => field.name === 'id')?.values.map((id) => id)[index],
+    name: objectData.find((field) => field.name === 'name')?.values.map((name) => name)[index],
+    latitude: objectData.find((field) => field.name === 'latitude')?.values.map((latitude) => latitude)[index],
+    longitude: objectData.find((field) => field.name === 'longitude')?.values.map((longitude) => longitude)[index],
+    timestamp: objectData.find((field) => field.name === 'timestamp')?.values.map((timestamp) => timestamp)[index],
   }));
 
-  const boats = (queryBoats || []).reduce((acc: Boat[], currBoat) => {
+  const objects = (queryObjects || []).reduce((acc: MovingObject[], currBoat) => {
     const newPosition = {
       timestamp: new Date(currBoat.timestamp),
       lat: currBoat.latitude,
@@ -70,7 +63,6 @@ export const MapComponent: React.FC<Props> = ({ options, width, height, data, on
   const handleMapEventTrigger = (position: { lng: number; lat: number }, newValue: number) => {
     onOptionsChange({ ...options, lat: position.lat, lng: position.lng, zoom: newValue });
   };
-
   return (
     <MapContainer
       center={mapCenter}
@@ -89,41 +81,53 @@ export const MapComponent: React.FC<Props> = ({ options, width, height, data, on
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
       <MapContainerDescendant onMapEventTrigger={handleMapEventTrigger} />
-      {areas.map((area: Area, index: number) => {
-        return (
-          <div key={index}>
-            <Polygon positions={area.verticles} pathOptions={{ color: area.color }}>
-              {options.zoom >= 14 && (
-                <Tooltip
-                  sticky={!options.areas.isTooltipSticky}
-                  permanent={options.areas.isTooltipSticky}
-                  direction="center"
-                  className={styles.styledTooltip}
-                >
-                  {area.name}
-                </Tooltip>
-              )}
-            </Polygon>
-          </div>
-        );
-      })}
-      {boats &&
-        boats.map((boat) => {
-          const position = [
-            boat.positions[boat.positions.length - 1].lat,
-            boat.positions[boat.positions.length - 1].lng,
-          ] as LatLngExpression;
-          const linePoints = boat.positions.map((position) => [position.lat, position.lng]) as Array<LatLngExpression>;
+      <PolygonCreator onOptionsChange={onOptionsChange} options={options} objects={objects} controlKey={controlKey} />
+      {objects &&
+        objects.map((object) => {
+          const position = [object.positions[0].lat, object.positions[0].lng] as LatLngExpression;
+          const currentTimestamp = new Date(object.positions[0].timestamp);
+          const currDate =
+            shoulAddZero(currentTimestamp.getHours()) +
+            ':' +
+            shoulAddZero(currentTimestamp.getMinutes()) +
+            ', ' +
+            shoulAddZero(currentTimestamp.getDate()) +
+            '-' +
+            shoulAddZero(currentTimestamp.getMonth()) +
+            '-' +
+            currentTimestamp.getFullYear();
+
+          const linePoints = object.positions.map((position) => [
+            position.lat,
+            position.lng,
+          ]) as Array<LatLngExpression>;
+          let areasArr: String[] = [];
+          options.areas.areas.map((area: Area) => {
+            const areaVerticles = area.verticles.map((vertex: Vertex) => [vertex.lat, vertex.lng]);
+            if (isPointInPoly(areaVerticles, [object.positions[0].lat, object.positions[0].lng])) {
+              areasArr.push(area.name);
+            }
+          });
           return (
             <>
-              <Marker key={boat.id} position={position} icon={boatIcon}>
-                <Popup maxWidth={20}>
-                  <h2>{boat.name}</h2>
-                  current position: {boat.positions[boat.positions.length - 1].lat},{' '}
-                  {boat.positions[boat.positions.length - 1].lng}
+              <Marker key={object.id} position={position} icon={boatIcon}>
+                <Popup offset={[0, -20]} className={styles.styledPopup}>
+                  <p className={styles.title + ' ' + styles.text}>{object.name}</p>
+                  <p className={styles.headerText + ' ' + styles.text}>Status on:</p>
+                  <p className={styles.text}>{currDate}</p>
+                  <p className={styles.headerText + ' ' + styles.text}>Lat.:</p>
+                  <p className={styles.text}>{object.positions[0].lat}</p>
+                  <p className={styles.headerText + ' ' + styles.text}>Lng.:</p>
+                  <p className={styles.text}>{object.positions[0].lng}</p>
+                  {areasArr.length > 0 && (
+                    <>
+                      <span className={styles.headerText + ' ' + styles.text}>Inside: </span>
+                      <span className={styles.text}>{areasArr.join(', ')}</span>
+                    </>
+                  )}
                 </Popup>
               </Marker>
-              {historyVisibility &&
+              {tailVisibility &&
                 linePoints.map((point, index) => {
                   if (index + 1 >= linePoints.length) {
                     return;
@@ -133,17 +137,21 @@ export const MapComponent: React.FC<Props> = ({ options, width, height, data, on
                       key={index}
                       positions={[point, linePoints[index + 1]]}
                       weight={5}
-                      opacity={1 / (linePoints.length / (index + 2))}
-                      color={'green'}
+                      opacity={0.6}
+                      color={colorValues[index]}
                     />
                   );
                 })}
             </>
           );
         })}
-      <div className="leaflet-bottom leaflet-right">
-        <button className="leaflet-control" onClick={() => setHistoryVisibility(!historyVisibility)}>
-          click
+      <div className="leaflet-bottom leaflet-left">
+        <button
+          className={'leaflet-control' + ' ' + styles.styledButton}
+          onClick={() => onOptionsChange({ ...options, isTailVisible: !tailVisibility })}
+        >
+          <img src={tailVisibility ? show : hide} className={styles.styledImg} />
+          {'trail'.toUpperCase()}
         </button>
       </div>
     </MapContainer>

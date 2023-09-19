@@ -1,3 +1,13 @@
 .leaflet-container {
     height: 100%;
+    width: 100%;
+}
+
+.leaflet-popup-pane, .leaflet-control {
+    cursor: pointer;
+}
+
+.leaflet-popup-content-wrapper, .leaflet-popup-tip {
+    box-shadow: none;
+    background: rgba(255, 255, 255, 0.7);
 }

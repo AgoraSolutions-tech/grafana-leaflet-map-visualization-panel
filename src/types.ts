@@ -12,7 +12,7 @@ export interface ItemCollection {
   lat: number;
   lng: number;
 }
- export interface Boat {
+ export interface MovingObject {
   id: number;
   name: string;
   positions: Array<{
@@ -32,8 +32,10 @@ export interface Area {
 export interface MapOptions {
   lat: number;
   lng: number;
-  boatQuery: string;
+  objectQuery: string;
   zoom: number;
+  isTailVisible: boolean;
+  controlKey: number;
   areas: {
     isTooltipSticky: boolean;
     areas: Array<Area>;
