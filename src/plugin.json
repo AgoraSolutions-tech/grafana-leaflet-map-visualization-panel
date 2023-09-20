@@ -20,13 +20,13 @@
     }],
     "screenshots": [{
       "name": "Panel",
-      "path": "../docs/dashboard.png"
+      "path": "https://raw.githubusercontent.com/AgoraSolutions-tech/grafana-leaflet-map-visualization-panel/main/docs/dashboard.png"
     }, {
       "name": "Edit panel",
-      "path": "../docs/edit-panel.png"
+      "path": "https://raw.githubusercontent.com/AgoraSolutions-tech/grafana-leaflet-map-visualization-panel/main/docs/edit-panel.png"
     }, {
       "name": "Areas tab",
-      "path": "../docs/areas-tab.png"
+      "path": "https://raw.githubusercontent.com/AgoraSolutions-tech/grafana-leaflet-map-visualization-panel/main/docs/areas-tab.png"
     }],
     "version": "%VERSION%",
     "updated": "%TODAY%"
