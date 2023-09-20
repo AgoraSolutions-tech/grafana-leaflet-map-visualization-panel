@@ -1,6 +1,6 @@
 import React from 'react';
 import { PanelProps } from '@grafana/data';
-import { TileLayer, MapContainer, Marker, Polyline, Popup } from 'react-leaflet';
+import { TileLayer, MapContainer, Marker, Polyline, Popup, LayersControl } from 'react-leaflet';
 import L, { LatLngExpression } from 'leaflet';
 import { MovingObject, MapOptions, Area, Vertex } from 'types';
 import { cx, css } from '@emotion/css';
@@ -76,12 +76,23 @@ export const MapComponent: React.FC<Props> = ({ options, width, height, data, on
         `
       )}
     >
-      <TileLayer
-        attribution='&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, <a href="http://viewfinderpanoramas.org">SRTM</a>OpenStreetMap</a>OpenStreetMap</a> contributors'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />
+      <LayersControl>
+        <LayersControl.BaseLayer name="OpenStreetMap" checked={true}>
+          <TileLayer
+            attribution='&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, <a href="http://viewfinderpanoramas.org">SRTM</a>OpenStreetMap</a>OpenStreetMap</a> contributors'
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          />
+        </LayersControl.BaseLayer>
+        <LayersControl.BaseLayer name="Esri.WorldImagery">
+          <TileLayer
+            attribution="Powered by <a href='https://www.esri.com/en-us/home'>Esri</a> &mdash; Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community"
+            url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+          />
+        </LayersControl.BaseLayer>
+      </LayersControl>
+
       <MapContainerDescendant onMapEventTrigger={handleMapEventTrigger} />
-      <PolygonCreator onOptionsChange={onOptionsChange} options={options} objects={objects} controlKey={controlKey} />
+      {objects && <PolygonCreator onOptionsChange={onOptionsChange} options={options} objects={objects} controlKey={controlKey} />}
       {objects &&
         objects.map((object) => {
           const position = [object.positions[0].lat, object.positions[0].lng] as LatLngExpression;
