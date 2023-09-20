@@ -2,7 +2,7 @@
   "$schema": "https://raw.githubusercontent.com/grafana/grafana/master/docs/sources/developers/plugins/plugin.schema.json",
   "type": "panel",
   "name": "Leaflet Map Visualization",
-  "id": "agora-leafletmapvisualization-panel",
+  "id": "agorasol-leafletmapvisualization-panel",
   "info": {
     "keywords": ["panel", "map", "Leaflet", "drawing polygons", "areas", "location tracking"],
     "description": "A tool enables users to create interactive maps, draw polygons, real-time management of geolocation data for objects, and displaying historical positions.",
