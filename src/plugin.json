@@ -20,13 +20,13 @@
     }],
     "screenshots": [{
       "name": "Panel",
-      "path": "/docs/dashboard.png"
+      "path": "docs/dashboard.png"
     }, {
       "name": "Edit panel",
-      "path": "/docs/edit-panel.png"
+      "path": "docs/edit-panel.png"
     }, {
       "name": "Areas tab",
-      "path": "/docs/areas-tab.png"
+      "path": "docs/areas-tab.png"
     }],
     "version": "%VERSION%",
     "updated": "%TODAY%"
