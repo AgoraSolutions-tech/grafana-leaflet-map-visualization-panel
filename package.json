@@ -1,6 +1,6 @@
 {
   "name": "leaflet-map-visualization",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "A tool enables users to create interactive maps, draw polygons, real-time management of geolocation data for objects, and displaying historical positions.",
   "scripts": {
     "build": "webpack -c ./.config/webpack/webpack.config.ts --env production",
