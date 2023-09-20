@@ -6,7 +6,7 @@ on:
       - 'v*' # Run workflow on version tags, e.g. v1.0.0.
 
 permissions:
-  contents: write
+  contents: read and write permissions
 
 jobs:
   release:
