@@ -85,8 +85,16 @@ export const MapComponent: React.FC<Props> = ({ options, width, height, data, on
         </LayersControl.BaseLayer>
         <LayersControl.BaseLayer name="Esri.WorldImagery">
           <TileLayer
+            maxZoom={17}
             attribution="Powered by <a href='https://www.esri.com/en-us/home'>Esri</a> &mdash; Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community"
             url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+          />
+        </LayersControl.BaseLayer> 
+        <LayersControl.BaseLayer name="OpenTopoMap">
+          <TileLayer
+            maxZoom={17}
+            attribution='Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)'
+            url="https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png"
           />
         </LayersControl.BaseLayer>
       </LayersControl>
