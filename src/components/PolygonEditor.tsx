@@ -6,6 +6,7 @@ import { FieldValues, useFieldArray, useForm } from 'react-hook-form';
 import { VerticlesForm } from './VerticlesForm';
 import { uniqueId } from 'helpers';
 import { PolygonEditorStyles } from './style';
+import { ErrorMessage } from '@hookform/error-message';
 
 type PolygonEditorProps = StandardEditorProps<{ isTooltipSticky: boolean; areas: Array<Area> }>;
 
@@ -32,7 +33,7 @@ export const PolygonEditor = ({ value, onChange, context }: PolygonEditorProps) 
     };
   }, [value]);
 
-  const { control, register, watch, setValue, handleSubmit } = useForm<{
+  const { control, register, watch, setValue, handleSubmit, formState, getFieldState } = useForm<{
     areas: Array<Area>;
     isTooltipSticky: boolean;
   }>({
@@ -62,25 +63,28 @@ export const PolygonEditor = ({ value, onChange, context }: PolygonEditorProps) 
     [onChange]
   );
 
+  const isFieldInvalid = (index: number) => {
+    const fieldState = getFieldState(`areas.${index}.name`);
+    return fieldState.invalid;
+  };
+
   const calculatePolygonVerticles = (lat: number, lng: number) => {
     const diff = 0.001;
     return [
-      { lat: lat - diff, lng: lng + diff, id: Math.random() },
-      { lat: lat - diff, lng: lng - diff, id: Math.random() },
-      { lat: lat + diff, lng: lng - diff, id: Math.random() },
-      { lat: lat + diff, lng: lng + diff, id: Math.random() },
+      { lat: lat - diff, lng: lng + diff, id: uniqueId() },
+      { lat: lat - diff, lng: lng - diff, id: uniqueId() },
+      { lat: lat + diff, lng: lng - diff, id: uniqueId() },
+      { lat: lat + diff, lng: lng + diff, id: uniqueId() },
     ];
   };
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <div>
         <div className={styles.tooltipWrapper}>
-          <InlineSwitch 
-            showLabel={true} {...register(`isTooltipSticky` as const)} 
-            label={watch(`isTooltipSticky`) 
-              ? "Always show area names"
-              : "Show area names on hover"
-            } 
+          <InlineSwitch
+            showLabel={true}
+            {...register(`isTooltipSticky` as const)}
+            label={watch(`isTooltipSticky`) ? 'Always show area names' : 'Show area names on hover'}
           />
         </div>
         <div style={{ marginBottom: '1rem' }}>
@@ -91,7 +95,8 @@ export const PolygonEditor = ({ value, onChange, context }: PolygonEditorProps) 
                 <div>
                   <Label>Name</Label>
                   <Input
-                    {...register(`areas.${index}.name` as const)}
+                    invalid={isFieldInvalid(index)}
+                    {...register(`areas.${index}.name` as const, { required: 'Enter area name', maxLength: 255 })}
                     defaultValue={field.name}
                     placeholder="Enter the area name"
                   />
@@ -116,8 +121,18 @@ export const PolygonEditor = ({ value, onChange, context }: PolygonEditorProps) 
                   tooltip="Remove the area"
                 />
               </HorizontalGroup>
+              <div className={styles.errorMessage}>
+                <ErrorMessage name={`areas.${index}.name`} errors={formState.errors} />
+              </div>
               <br />
-              <VerticlesForm initialIsOpen={field.isNew} control={control} register={register} index={index} />
+              <VerticlesForm
+                initialIsOpen={field.isNew}
+                control={control}
+                register={register}
+                index={index}
+                formState={formState}
+                getFieldState={getFieldState}
+              />
               <div style={{ margin: '10px 0 20px', height: '1px', width: '100%' }} />
             </div>
           ))}

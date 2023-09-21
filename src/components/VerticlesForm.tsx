@@ -1,40 +1,33 @@
 import React, { useState } from 'react';
 import { Button, HorizontalGroup, Input, Label, useStyles2 } from '@grafana/ui';
-import { css } from '@emotion/css';
 import { uniqueId } from 'helpers';
-import { Control, useFieldArray } from 'react-hook-form';
+import { Control, FormState, UseFormGetFieldState, useFieldArray } from 'react-hook-form';
 import { Area } from 'types';
+import { ErrorMessage } from '@hookform/error-message';
+import { VerticlesFormStyles } from './style';
 
 interface Props {
   control: Control<{ areas: Array<Area>; isTooltipSticky: boolean }>;
   register: any;
   index: number;
   initialIsOpen?: boolean;
+  formState: FormState<{ areas: Array<Area>; isTooltipSticky: boolean }>;
+  getFieldState: UseFormGetFieldState<{ areas: Array<Area>; isTooltipSticky: boolean }>;
 }
 
-const getSyles = () => {
-  return {
-    styledLabel: css`
-      margin: 10px 0;
-    `,
-    firstVertex: css`
-      position: relative;
-      top: 20px;
-    `,
-    verticlesLabel: css`
-      position: relative;
-      left: -25px;
-    `,
-  };
-};
-
-export const VerticlesForm = ({ control, register, index, initialIsOpen = false }: Props) => {
+export const VerticlesForm = ({ control, register, index, initialIsOpen = false, formState, getFieldState }: Props) => {
   const [isOpen, setIsOpen] = useState(initialIsOpen);
-  const styles = useStyles2(getSyles);
+  const styles = useStyles2(VerticlesFormStyles);
+  const errors = formState.errors;
 
   const verticlesButtonText = isOpen ? 'Verticles:' : 'Show verticles';
 
-  const { append, fields, remove } = useFieldArray({ control, name: `areas.${index}.verticles`})
+  const { append, fields, remove } = useFieldArray({ control, name: `areas.${index}.verticles` });
+
+  const isFieldInvalid = (index: number, vertexIndex: number, value: 'lat' | 'lng') => {
+    const fieldState = getFieldState(`areas.${index}.verticles.${vertexIndex}.${value}`);
+    return fieldState.invalid;
+  };
 
   return (
     <>
@@ -50,65 +43,87 @@ export const VerticlesForm = ({ control, register, index, initialIsOpen = false 
         {verticlesButtonText}
       </Button>
       <div style={{ display: isOpen ? 'block' : 'none' }}>
-              <div style={{ marginBottom: '1rem' }}>
-                {fields.map((vertex, vertexIndex) => (
-                  <div key={vertex.id}>
-                    <div key={vertexIndex}>
-                      <input type="hidden" {...register(`areas.${index}.verticles.${vertexIndex}.id` as const)} />
-                      <HorizontalGroup>
-                        <Label className={vertexIndex === 0 ? styles.firstVertex : ''}>{vertexIndex + 1}</Label>
-                        <div>
-                          {vertexIndex === 0 && <Label className={styles.styledLabel}>Latitude: </Label>}
-                            <Input
-                              {...register(`areas.${index}.verticles.${vertexIndex}.lat` as const, {
-                                valueAsNumber: true,
-                              })}
-                              defaultValue={vertex.lat}
-                            />                        
-                        </div>
-                        <div>
-                          {vertexIndex === 0 && <Label className={styles.styledLabel}>Longitude: </Label>}
-                            <Input
-                              {...register(`areas.${index}.verticles.${vertexIndex}.lng` as const, {
-                                valueAsNumber: true,
-                              })}
-                              defaultValue={vertex.lng}
-                            />
-                        </div>
-                        <Button
-                          icon="trash-alt"
-                          onClick={() => {
-                            if (fields.length >= 4) {
-                              remove(vertexIndex);
-                            }
-                          }}
-                          variant="secondary"
-                          size="sm"
-                          fill="text"
-                          tooltip={"Remove this vertex"}
-                          className={vertexIndex === 0 ? styles.firstVertex : ''}
-                        />
-                      </HorizontalGroup>
+        <div style={{ marginBottom: '1rem' }}>
+          {fields.map((vertex, vertexIndex) => (
+            <div key={vertex.id}>
+              <div key={vertexIndex}>
+                <input type="hidden" {...register(`areas.${index}.verticles.${vertexIndex}.id` as const)} />
+                <HorizontalGroup>
+                  <Label className={vertexIndex === 0 ? styles.firstVertex : ''}>{vertexIndex + 1}</Label>
+                  <div>
+                    {vertexIndex === 0 && <Label className={styles.styledLabel}>Latitude: </Label>}
+                    <div>
+                      <div className={styles.errorMessage}>
+                        <ErrorMessage name={`areas.${index}.verticles.${vertexIndex}.lat`} errors={errors} />
+                      </div>
+                      <Input
+                        invalid={isFieldInvalid(index, vertexIndex, 'lat')}
+                        {...register(`areas.${index}.verticles.${vertexIndex}.lat` as const, {
+                          required: 'Enter vertex latitiude',
+                          pattern: {
+                            value: /^-?\d+(\.\d+)?$/,
+                            message: 'Invalid latitiude format',
+                          },
+                          maxLenght: 255,
+                        })}
+                        defaultValue={vertex.lat}
+                      />
                     </div>
                   </div>
-                ))}
+                  <div>
+                    {vertexIndex === 0 && <Label className={styles.styledLabel}>Longitude: </Label>}
+                    <div>
+                      <div className={styles.errorMessage}>
+                        <ErrorMessage name={`areas.${index}.verticles.${vertexIndex}.lng`} errors={errors} />
+                      </div>
+                      <Input
+                        invalid={isFieldInvalid(index, vertexIndex, 'lng')}
+                        {...register(`areas.${index}.verticles.${vertexIndex}.lng` as const, {
+                          required: 'Enter vertex longitiude',
+                          pattern: {
+                            value: /^-?\d+(\.\d+)?$/,
+                            message: 'Invalid longitude format',
+                          },
+                          maxLenght: 255,
+                        })}
+                        defaultValue={vertex.lng}
+                      />
+                    </div>
+                  </div>
+                  <Button
+                    icon="trash-alt"
+                    onClick={() => {
+                      if (fields.length >= 4) {
+                        remove(vertexIndex);
+                      }
+                    }}
+                    variant="secondary"
+                    size="sm"
+                    fill="text"
+                    tooltip={'Remove this vertex'}
+                    className={vertexIndex === 0 ? styles.firstVertex : ''}
+                  />
+                </HorizontalGroup>
               </div>
-              <Button
-                style={{ marginRight: '1rem' }}
-                onClick={() =>
-                  append({
-                    id: uniqueId(),
-                    lat: fields[fields.length - 1].lat,
-                    lng: fields[fields.length - 1].lng,
-                  })
-                }
-                variant="secondary"
-                size="sm"
-                icon="plus"
-                tooltip={"Add a new vertex"}
-             >
-                Add vertex
-              </Button>
+            </div>
+          ))}
+        </div>
+        <Button
+          style={{ marginRight: '1rem' }}
+          onClick={() =>
+            append({
+              id: uniqueId(),
+              lat: fields[fields.length - 1].lat,
+              lng: fields[fields.length - 1].lng,
+            })
+          }
+          variant="secondary"
+          size="sm"
+          icon="plus"
+          tooltip={'Add a new vertex'}
+        >
+          Add vertex
+        </Button>
       </div>
     </>
   );
