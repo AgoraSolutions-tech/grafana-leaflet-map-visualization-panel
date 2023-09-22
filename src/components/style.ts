@@ -74,5 +74,31 @@ export const PolygonEditorStyles = () => {
     tooltipWrapper: css`
       margin-bottom: 25px;
     `,
+    errorMessage: css`
+      color: red;
+      width: 100%;
+      margin-top: 5px;
+    `,
   };
 };
+
+export const VerticlesFormStyles = () => {
+  return {
+    styledLabel: css`
+      margin: 10px 0;
+    `,
+    firstVertex: css`
+      position: relative;
+      top: 20px;
+    `,
+    verticlesLabel: css`
+      position: relative;
+      left: -25px;
+    `,
+    errorMessage: css`
+      color: red;
+      width: 100%;
+      margin-bottom: 5px;
+    `,
+  }
+}
