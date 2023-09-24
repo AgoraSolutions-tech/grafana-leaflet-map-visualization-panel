@@ -53,3 +53,13 @@ export const isPointInPoly = (polygon: any, point: any) => {
   }
   return c;
 };
+
+export const calculatePolygonVerticles = (lat: number, lng: number) => {
+  const diff = 0.001;
+  return [
+    { lat: lat - diff, lng: lng + diff, id: uniqueId() },
+    { lat: lat - diff, lng: lng - diff, id: uniqueId() },
+    { lat: lat + diff, lng: lng - diff, id: uniqueId() },
+    { lat: lat + diff, lng: lng + diff, id: uniqueId() },
+  ];
+};
