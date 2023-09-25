@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { PanelProps } from '@grafana/data';
-import { TileLayer, MapContainer, Marker, Polyline, Popup, LayersControl } from 'react-leaflet';
+import { TileLayer, MapContainer, Marker, Polyline, Popup } from 'react-leaflet';
 import L, { LatLngExpression } from 'leaflet';
 import { MovingObject, MapOptions, Area, Vertex } from 'types';
 import { cx, css } from '@emotion/css';
