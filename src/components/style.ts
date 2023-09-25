@@ -41,6 +41,18 @@ export const MapContainesStyles = () => {
         background: transparent !important;
         background-color: none;
       `,
+      pickerWrapper: css`
+        position: relative;
+        & [data-testid='date-picker'] {
+          position: absolute;
+          bottom: 0;
+        }    
+     `,
+      buttonWrapper: css`
+        display: flex;
+        flex-direction: row;
+        height: 100%;
+      `
     };
   };
 

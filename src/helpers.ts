@@ -34,13 +34,6 @@ export const colorValues = [
   "#CADDFF"
 ];
 
-export const shoulAddZero = (el: string | number) => {
-  if (el.toString().length === 1) {
-    return '0' + el;
-  }
-  return el;
-};
-
 export const isPointInPoly = (polygon: any, point: any) => {
   let c = false;
   for (let i = -1, l = polygon.length, j = l - 1; ++i < l; j = i) {

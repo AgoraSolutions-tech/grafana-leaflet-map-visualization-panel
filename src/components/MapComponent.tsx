@@ -1,12 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { PanelProps } from '@grafana/data';
-import { TileLayer, MapContainer, Marker, Polyline, Popup, LayersControl } from 'react-leaflet';
+import { TileLayer, MapContainer, Marker, Polyline, Popup } from 'react-leaflet';
 import L, { LatLngExpression } from 'leaflet';
 import { MovingObject, MapOptions, Area, Vertex } from 'types';
 import { cx, css } from '@emotion/css';
-import { useStyles2 } from '@grafana/ui';
+import { DatePicker, useStyles2 } from '@grafana/ui';
 import { MapContainerDescendant } from './MapContainerDescendant';
-import { colorValues, isPointInPoly, shoulAddZero } from 'helpers';
+import { colorValues, isPointInPoly } from 'helpers';
+import { format, isSameDay } from 'date-fns'
 import show from '../img/show.png';
 import hide from '../img/hide.png';
 
@@ -18,9 +19,13 @@ import { PolygonCreator } from './PolygonCreator';
 
 interface Props extends PanelProps<MapOptions> {}
 
+const TODAY = new Date();
+
 export const MapComponent: React.FC<Props> = ({ options, width, height, data, onOptionsChange }) => {
   const styles = useStyles2(MapContainesStyles);
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
+  const dateToDisplay = options.dateToDisplay || TODAY;
   const mapCenter: LatLngExpression = [options.lat, options.lng];
   const tailVisibility = options.isTailVisible;
   const zoomValue = options.zoom;
@@ -47,132 +52,136 @@ export const MapComponent: React.FC<Props> = ({ options, width, height, data, on
       lat: currBoat.latitude,
       lng: currBoat.longitude,
     };
-    const existingBoat = acc.find((boat) => boat.id === currBoat.id);
-    if (existingBoat) {
-      existingBoat.positions.unshift(newPosition);
+    const existingObject = acc.find((boat) => boat.id === currBoat.id);
+    if (existingObject) {
+      existingObject.positions.unshift(newPosition);
       return acc;
     }
-    const newBoat = {
+    const newObject = {
       id: currBoat.id,
       name: currBoat.name,
       positions: [newPosition],
     };
-    return [...acc, newBoat];
+    return [...acc, newObject];
   }, []);
+
+  const currentObjects = objects
+    .map(object => ({
+      ...object,
+      positions: object.positions.filter(position => isSameDay(position.timestamp, dateToDisplay))
+    }))
+    .filter(object => object.positions.length > 0);
 
   const handleMapEventTrigger = (position: { lng: number; lat: number }, newValue: number) => {
     onOptionsChange({ ...options, lat: position.lat, lng: position.lng, zoom: newValue });
   };
   return (
-    <MapContainer
-      center={mapCenter}
-      zoom={zoomValue}
-      scrollWheelZoom={true}
-      className={cx(
-        styles.wrapper,
-        css`
-          width: ${width}px;
-          height: ${height}px;
-        `
-      )}
-    >
-      <LayersControl>
-        <LayersControl.BaseLayer name="OpenStreetMap" checked={true}>
-          <TileLayer
-            attribution='&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, <a href="http://viewfinderpanoramas.org">SRTM</a>OpenStreetMap</a>OpenStreetMap</a> contributors'
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          />
-        </LayersControl.BaseLayer>
-        <LayersControl.BaseLayer name="Esri.WorldImagery">
-          <TileLayer
-            maxZoom={17}
-            attribution="Powered by <a href='https://www.esri.com/en-us/home'>Esri</a> &mdash; Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community"
-            url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
-          />
-        </LayersControl.BaseLayer> 
-        <LayersControl.BaseLayer name="OpenTopoMap">
-          <TileLayer
-            maxZoom={17}
-            attribution='Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)'
-            url="https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png"
-          />
-        </LayersControl.BaseLayer>
-      </LayersControl>
+    <>
+      <MapContainer
+        center={mapCenter}
+        zoom={zoomValue}
+        scrollWheelZoom={true}
+        className={cx(
+          styles.wrapper,
+          css`
+            width: ${width}px;
+            height: ${height}px;
+          `
+        )}
+      >
+        <TileLayer
+          attribution='&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, <a href="http://viewfinderpanoramas.org">SRTM</a>OpenStreetMap</a>OpenStreetMap</a> contributors'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
+        <MapContainerDescendant onMapEventTrigger={handleMapEventTrigger} />
+        <PolygonCreator onOptionsChange={onOptionsChange} options={options} objects={objects} controlKey={controlKey} />
+        {currentObjects && currentObjects.length > 0 &&          
+          currentObjects.map((object) => {
+            const position = [object?.positions[0].lat, object.positions[0].lng] as LatLngExpression;
+            const currentTimestamp = new Date(object.positions[0].timestamp);
+            const currDate = format(currentTimestamp, 'dd-MM-yyyy');
 
-      <MapContainerDescendant onMapEventTrigger={handleMapEventTrigger} />
-      {objects && <PolygonCreator onOptionsChange={onOptionsChange} options={options} objects={objects} controlKey={controlKey} />}
-      {objects &&
-        objects.map((object) => {
-          const position = [object.positions[0].lat, object.positions[0].lng] as LatLngExpression;
-          const currentTimestamp = new Date(object.positions[0].timestamp);
-          const currDate =
-            shoulAddZero(currentTimestamp.getHours()) +
-            ':' +
-            shoulAddZero(currentTimestamp.getMinutes()) +
-            ', ' +
-            shoulAddZero(currentTimestamp.getDate()) +
-            '-' +
-            shoulAddZero(currentTimestamp.getMonth()) +
-            '-' +
-            currentTimestamp.getFullYear();
-
-          const linePoints = object.positions.map((position) => [
-            position.lat,
-            position.lng,
-          ]) as Array<LatLngExpression>;
-          let areasArr: String[] = [];
-          options.areas?.areas.map((area: Area) => {
-            const areaVerticles = area.verticles.map((vertex: Vertex) => [vertex.lat, vertex.lng]);
-            if (isPointInPoly(areaVerticles, [object.positions[0].lat, object.positions[0].lng])) {
-              areasArr.push(area.name);
-            }
-          });
-          return (
-            <>
-              <Marker key={object.id} position={position} icon={boatIcon}>
-                <Popup offset={[0, -20]} className={styles.styledPopup}>
-                  <p className={styles.title + ' ' + styles.text}>{object.name}</p>
-                  <p className={styles.headerText + ' ' + styles.text}>Status on:</p>
-                  <p className={styles.text}>{currDate}</p>
-                  <p className={styles.headerText + ' ' + styles.text}>Lat.:</p>
-                  <p className={styles.text}>{object.positions[0].lat}</p>
-                  <p className={styles.headerText + ' ' + styles.text}>Lng.:</p>
-                  <p className={styles.text}>{object.positions[0].lng}</p>
-                  {areasArr.length > 0 && (
-                    <>
-                      <span className={styles.headerText + ' ' + styles.text}>Inside: </span>
-                      <span className={styles.text}>{areasArr.join(', ')}</span>
-                    </>
-                  )}
-                </Popup>
-              </Marker>
-              {tailVisibility &&
-                linePoints.map((point, index) => {
-                  if (index + 1 >= linePoints.length) {
-                    return;
-                  }
-                  return (
-                    <Polyline
-                      key={index}
-                      positions={[point, linePoints[index + 1]]}
-                      weight={5}
-                      opacity={0.6}
-                      color={colorValues[index]}
-                    />
-                  );
-                })}
-            </>
-          );
-        })}
-      <div className="leaflet-bottom leaflet-left">
-        <button
-          className={'leaflet-control' + ' ' + styles.styledButton}
-          onClick={() => onOptionsChange({ ...options, isTailVisible: !tailVisibility })}
-        >
-          <img src={tailVisibility ? show : hide} className={styles.styledImg} />
-          {'trail'.toUpperCase()}
-        </button>
-      </div>
-    </MapContainer>
+            const linePoints = object.positions.map((position) => [
+              position.lat,
+              position.lng,
+            ]) as Array<LatLngExpression>;
+            let areasArr: String[] = [];
+            options.areas?.areas.map((area: Area) => {
+              const areaVerticles = area.verticles.map((vertex: Vertex) => [vertex.lat, vertex.lng]);
+              if (isPointInPoly(areaVerticles, [object.positions[0].lat, object.positions[0].lng])) {
+                areasArr.push(area.name);
+              }
+            });
+            return (
+              <>
+                <Marker key={object.id} position={position} icon={boatIcon}>
+                  <Popup offset={[0, -20]} className={styles.styledPopup}>
+                    <p className={styles.title + ' ' + styles.text}>{object.name}</p>
+                    <p className={styles.headerText + ' ' + styles.text}>Status on:</p>
+                    <p className={styles.text}>{currDate}</p>
+                    <p className={styles.headerText + ' ' + styles.text}>Lat.:</p>
+                    <p className={styles.text}>{object.positions[0].lat}</p>
+                    <p className={styles.headerText + ' ' + styles.text}>Lng.:</p>
+                    <p className={styles.text}>{object.positions[0].lng}</p>
+                    {areasArr.length > 0 && (
+                      <>
+                        <span className={styles.headerText + ' ' + styles.text}>Inside: </span>
+                        <span className={styles.text}>{areasArr.join(', ')}</span>
+                      </>
+                    )}
+                  </Popup>
+                </Marker>
+                {tailVisibility &&
+                  linePoints.map((point, index) => {
+                    if (index + 1 >= linePoints.length) {
+                      return;
+                    }
+                    return (
+                      <Polyline
+                        key={index}
+                        positions={[point, linePoints[index + 1]]}
+                        weight={5}
+                        opacity={0.6}
+                        color={colorValues[index]}
+                      />
+                    );
+                  })}
+              </>
+            );
+          })}
+        <div className="leaflet-bottom leaflet-left" >
+          <div className={styles.buttonWrapper}>
+            <button
+              className={'leaflet-control' + ' ' + styles.styledButton}
+              onClick={() => onOptionsChange({ ...options, isTailVisible: !tailVisibility })}
+            >
+              <img src={tailVisibility ? show : hide} className={styles.styledImg} />
+              {'trail'.toUpperCase()}
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsCalendarOpen(true)}
+              className={'leaflet-control' + ' ' + styles.styledButton}
+            >
+              {format(dateToDisplay, 'dd-MM-yyyy')}
+            </button>
+            <div className={'leaflet-control' + ' ' + styles.pickerWrapper}>
+              <DatePicker
+                onClose={() => {
+                  setIsCalendarOpen(false);
+                }}
+                onChange={(newDate) => {
+                  onOptionsChange({ ...options, dateToDisplay: newDate });
+                  setIsCalendarOpen(false);
+                }}
+                value={dateToDisplay}
+                isOpen={isCalendarOpen}
+                maxDate={TODAY}
+              />
+            </div>
+          </div>
+        </div>
+      </MapContainer>
+    </>
   );
 };
