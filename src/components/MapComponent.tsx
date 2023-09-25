@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { PanelProps } from '@grafana/data';
-import { TileLayer, MapContainer, Marker, Polyline, Popup } from 'react-leaflet';
+import { TileLayer, MapContainer, Marker, Polyline, Popup, LayersControl } from 'react-leaflet';
 import L, { LatLngExpression } from 'leaflet';
 import { MovingObject, MapOptions, Area, Vertex } from 'types';
 import { cx, css } from '@emotion/css';
 import { DatePicker, useStyles2 } from '@grafana/ui';
 import { MapContainerDescendant } from './MapContainerDescendant';
 import { colorValues, isPointInPoly } from 'helpers';
-import { format, isSameDay } from 'date-fns'
+import { format, isSameDay } from 'date-fns';
 import show from '../img/show.png';
 import hide from '../img/hide.png';
 
@@ -66,11 +66,11 @@ export const MapComponent: React.FC<Props> = ({ options, width, height, data, on
   }, []);
 
   const currentObjects = objects
-    .map(object => ({
+    .map((object) => ({
       ...object,
-      positions: object.positions.filter(position => isSameDay(position.timestamp, dateToDisplay))
+      positions: object.positions.filter((position) => isSameDay(position.timestamp, dateToDisplay)),
     }))
-    .filter(object => object.positions.length > 0);
+    .filter((object) => object.positions.length > 0);
 
   const handleMapEventTrigger = (position: { lng: number; lat: number }, newValue: number) => {
     onOptionsChange({ ...options, lat: position.lat, lng: position.lng, zoom: newValue });
@@ -89,67 +89,86 @@ export const MapComponent: React.FC<Props> = ({ options, width, height, data, on
           `
         )}
       >
-        <TileLayer
-          attribution='&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, <a href="http://viewfinderpanoramas.org">SRTM</a>OpenStreetMap</a>OpenStreetMap</a> contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
+          <LayersControl>
+            <LayersControl.BaseLayer name="OpenStreetMap" checked={true}>
+              <TileLayer
+                attribution='&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, <a href="http://viewfinderpanoramas.org">SRTM</a>OpenStreetMap</a>OpenStreetMap</a> contributors'
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              />
+            </LayersControl.BaseLayer>
+            <LayersControl.BaseLayer name="Esri.WorldImagery">
+              <TileLayer
+                maxZoom={17}
+                attribution="Powered by <a href='https://www.esri.com/en-us/home'>Esri</a> &mdash; Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community"
+                url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+              />
+            </LayersControl.BaseLayer>
+            <LayersControl.BaseLayer name="OpenTopoMap">
+              <TileLayer
+                maxZoom={17}
+                attribution='Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)'
+                url="https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png"
+              />
+            </LayersControl.BaseLayer>
+          </LayersControl>
         <MapContainerDescendant onMapEventTrigger={handleMapEventTrigger} />
         <PolygonCreator onOptionsChange={onOptionsChange} options={options} objects={objects} controlKey={controlKey} />
-        {currentObjects && currentObjects.length > 0 &&          
-          currentObjects.map((object) => {
-            const position = [object?.positions[0].lat, object.positions[0].lng] as LatLngExpression;
-            const currentTimestamp = new Date(object.positions[0].timestamp);
-            const currDate = format(currentTimestamp, 'dd-MM-yyyy');
+          {currentObjects &&
+            currentObjects.length > 0 &&
+            currentObjects.map((object) => {
+              const position = [object?.positions[0].lat, object.positions[0].lng] as LatLngExpression;
+              const currentTimestamp = new Date(object.positions[0].timestamp);
+              const currDate = format(currentTimestamp, 'dd-MM-yyyy');
 
-            const linePoints = object.positions.map((position) => [
-              position.lat,
-              position.lng,
-            ]) as Array<LatLngExpression>;
-            let areasArr: String[] = [];
-            options.areas?.areas.map((area: Area) => {
-              const areaVerticles = area.verticles.map((vertex: Vertex) => [vertex.lat, vertex.lng]);
-              if (isPointInPoly(areaVerticles, [object.positions[0].lat, object.positions[0].lng])) {
-                areasArr.push(area.name);
-              }
-            });
-            return (
-              <>
-                <Marker key={object.id} position={position} icon={boatIcon}>
-                  <Popup offset={[0, -20]} className={styles.styledPopup}>
-                    <p className={styles.title + ' ' + styles.text}>{object.name}</p>
-                    <p className={styles.headerText + ' ' + styles.text}>Status on:</p>
-                    <p className={styles.text}>{currDate}</p>
-                    <p className={styles.headerText + ' ' + styles.text}>Lat.:</p>
-                    <p className={styles.text}>{object.positions[0].lat}</p>
-                    <p className={styles.headerText + ' ' + styles.text}>Lng.:</p>
-                    <p className={styles.text}>{object.positions[0].lng}</p>
-                    {areasArr.length > 0 && (
-                      <>
-                        <span className={styles.headerText + ' ' + styles.text}>Inside: </span>
-                        <span className={styles.text}>{areasArr.join(', ')}</span>
-                      </>
-                    )}
-                  </Popup>
-                </Marker>
-                {tailVisibility &&
-                  linePoints.map((point, index) => {
-                    if (index + 1 >= linePoints.length) {
-                      return;
-                    }
-                    return (
-                      <Polyline
-                        key={index}
-                        positions={[point, linePoints[index + 1]]}
-                        weight={5}
-                        opacity={0.6}
-                        color={colorValues[index]}
-                      />
-                    );
-                  })}
-              </>
-            );
-          })}
-        <div className="leaflet-bottom leaflet-left" >
+              const linePoints = object.positions.map((position) => [
+                position.lat,
+                position.lng,
+              ]) as Array<LatLngExpression>;
+              let areasArr: String[] = [];
+              options.areas?.areas.map((area: Area) => {
+                const areaVerticles = area.verticles.map((vertex: Vertex) => [vertex.lat, vertex.lng]);
+                if (isPointInPoly(areaVerticles, [object.positions[0].lat, object.positions[0].lng])) {
+                  areasArr.push(area.name);
+                }
+              });
+              return (
+                <>
+                  <Marker key={object.id} position={position} icon={boatIcon}>
+                    <Popup offset={[0, -20]} className={styles.styledPopup}>
+                      <p className={styles.title + ' ' + styles.text}>{object.name}</p>
+                      <p className={styles.headerText + ' ' + styles.text}>Status on:</p>
+                      <p className={styles.text}>{currDate}</p>
+                      <p className={styles.headerText + ' ' + styles.text}>Lat.:</p>
+                      <p className={styles.text}>{object.positions[0].lat}</p>
+                      <p className={styles.headerText + ' ' + styles.text}>Lng.:</p>
+                      <p className={styles.text}>{object.positions[0].lng}</p>
+                      {areasArr.length > 0 && (
+                        <>
+                          <span className={styles.headerText + ' ' + styles.text}>Inside: </span>
+                          <span className={styles.text}>{areasArr.join(', ')}</span>
+                        </>
+                      )}
+                    </Popup>
+                  </Marker>
+                  {tailVisibility &&
+                    linePoints.map((point, index) => {
+                      if (index + 1 >= linePoints.length) {
+                        return;
+                      }
+                      return (
+                        <Polyline
+                          key={index}
+                          positions={[point, linePoints[index + 1]]}
+                          weight={5}
+                          opacity={0.6}
+                          color={colorValues[index]}
+                        />
+                      );
+                    })}
+                </>
+              );
+            })}
+        <div className="leaflet-bottom leaflet-left">
           <div className={styles.buttonWrapper}>
             <button
               className={'leaflet-control' + ' ' + styles.styledButton}
