@@ -111,12 +111,8 @@ export const PolygonCreator = (props: Props) => {
       const id: number = removedLayers[layerIds[i]].options.id;
       removedPoligonsIds.push(id);
     }
-    const newAreas = areas.filter((area) => {
-      if (removedPoligonsIds.includes(area.id)) {
-        return false;
-      }
-      return true;
-    });
+
+    const newAreas = areas.filter((area) => !removedPoligonsIds.includes(area.id));
 
     props.onOptionsChange({
       ...props.options,

@@ -66,7 +66,6 @@ export const VerticlesForm = ({ control, register, index, initialIsOpen = false,
                           },
                           maxLenght: 255,
                         })}
-                        defaultValue={vertex.lat}
                       />
                     </div>
                   </div>
@@ -86,7 +85,6 @@ export const VerticlesForm = ({ control, register, index, initialIsOpen = false,
                           },
                           maxLenght: 255,
                         })}
-                        defaultValue={vertex.lng}
                       />
                     </div>
                   </div>
