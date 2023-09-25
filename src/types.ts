@@ -36,6 +36,7 @@ export interface MapOptions {
   zoom: number;
   isTailVisible: boolean;
   controlKey: number;
+  dateToDisplay: Date;
   areas: {
     isTooltipSticky: boolean;
     areas: Array<Area>;
