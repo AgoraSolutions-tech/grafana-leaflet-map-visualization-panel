@@ -20,12 +20,12 @@ import { PolygonCreator } from './PolygonCreator';
 interface Props extends PanelProps<MapOptions> {}
 
 const TODAY = new Date();
+const TODAY_STRING = TODAY.toDateString();
 
 export const MapComponent: React.FC<Props> = ({ options, width, height, data, onOptionsChange }) => {
   const styles = useStyles2(MapContainesStyles);
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
-
-  const dateToDisplay = options.dateToDisplay || TODAY;
+  const dateToDisplay = options.dateToDisplay || TODAY_STRING;
   const mapCenter: LatLngExpression = [options.lat, options.lng];
   const tailVisibility = options.isTailVisible;
   const zoomValue = options.zoom;
@@ -68,7 +68,7 @@ export const MapComponent: React.FC<Props> = ({ options, width, height, data, on
   const currentObjects = objects
     .map((object) => ({
       ...object,
-      positions: object.positions.filter((position) => isSameDay(position.timestamp, dateToDisplay)),
+      positions: object.positions.filter((position) => isSameDay(position.timestamp, new Date(dateToDisplay))),
     }))
     .filter((object) => object.positions.length > 0);
 
@@ -182,7 +182,7 @@ export const MapComponent: React.FC<Props> = ({ options, width, height, data, on
               onClick={() => setIsCalendarOpen(true)}
               className={'leaflet-control' + ' ' + styles.styledButton}
             >
-              {format(dateToDisplay, 'dd-MM-yyyy')}
+              {format(new Date(dateToDisplay), 'dd-MM-yyyy')}
             </button>
             <div className={'leaflet-control' + ' ' + styles.pickerWrapper}>
               <DatePicker
@@ -190,10 +190,10 @@ export const MapComponent: React.FC<Props> = ({ options, width, height, data, on
                   setIsCalendarOpen(false);
                 }}
                 onChange={(newDate) => {
-                  onOptionsChange({ ...options, dateToDisplay: newDate });
+                  onOptionsChange({ ...options, dateToDisplay: newDate.toDateString()});
                   setIsCalendarOpen(false);
                 }}
-                value={dateToDisplay}
+                value={new Date(dateToDisplay)}
                 isOpen={isCalendarOpen}
                 maxDate={TODAY}
               />
