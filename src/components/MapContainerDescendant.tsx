@@ -19,7 +19,6 @@ export const MapContainerDescendant = (props: Props) => {
       props.onMapEventTrigger({ lng: newCenter.lng, lat: newCenter.lat }, newZoomValue);
     }
   });
-  map.flyTo([props.options.lat, props.options.lng]);
   return null;
 };
 

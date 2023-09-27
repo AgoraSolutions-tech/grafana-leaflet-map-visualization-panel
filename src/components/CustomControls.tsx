@@ -5,12 +5,13 @@ import { MapOptions, MovingObject } from 'types';
 import { CustomControlsStyles } from './style';
 import show from '../img/show.png';
 import hide from '../img/hide.png';
-import { format } from 'date-fns';
+import { formatDistance, isSameDay } from 'date-fns';
 
 interface Props {
   options: MapOptions;
-  onOptionsChange:  (options: MapOptions) => void;
   objects: MovingObject[];
+  currentObjects: MovingObject[];
+  onOptionsChange:  (options: MapOptions) => void;
 }
 
 const TODAY = new Date();
@@ -25,6 +26,7 @@ export const CustomControls = (props: Props) => {
   const selectedObjectId = props.options.selectedObjectId;
 
   return (
+    <>
     <div className="leaflet-bottom leaflet-left">
       <div className={styles.buttonWrapper}>
         <button
@@ -37,11 +39,11 @@ export const CustomControls = (props: Props) => {
         <div className={'leaflet-control' + ' ' + styles.controlWrapper}>
           <select
             onChange={e => {
-              const chosenObject = props.objects.find(object => String(object.id) === e.target.value);
+              const chosenObject = props.currentObjects.find(object => String(object.id) === e.target.value)
               props.onOptionsChange({
               ...props.options, 
               lat: chosenObject?.positions[0].lat || props.options.lat,
-              lng:chosenObject?.positions[0].lng || props.options.lng,
+              lng: chosenObject?.positions[0].lng || props.options.lng,
               selectedObjectId: e.target.value
             })
           }}
@@ -50,7 +52,11 @@ export const CustomControls = (props: Props) => {
             <option value="all" selected={selectedObjectId === 'all'}>See all objects</option>
             {props.objects.map((object, index) => {
               return (
-                <option key={index} value={object.id} selected={selectedObjectId === String(object.id)}>
+                <option 
+                  key={index} 
+                  value={object.id} 
+                  selected={selectedObjectId === String(object.id)}
+                >
                   {object.name}
                 </option>
               );
@@ -62,7 +68,7 @@ export const CustomControls = (props: Props) => {
           onClick={() => setIsCalendarOpen(true)}
           className={'leaflet-control' + ' ' + styles.styledButton}
         >
-          {format(new Date(dateToDisplay), 'dd-MM-yyyy')}
+          {isSameDay(TODAY, new Date(dateToDisplay)) ? 'today'.toLocaleUpperCase() : `${formatDistance(TODAY, new Date(dateToDisplay))} ago` }
         </button>
         <div className={'leaflet-control' + ' ' + styles.controlWrapper}>
           <DatePicker
@@ -82,5 +88,6 @@ export const CustomControls = (props: Props) => {
         </div>
       </div>
     </div>
+    </>
   );
 };

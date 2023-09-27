@@ -20,10 +20,10 @@ interface Props extends PanelProps<MapOptions> {}
 const TODAY = new Date();
 const TODAY_STRING = TODAY.toDateString();
 
-export const MapComponent: React.FC<Props> = ({ options, width, height, data, onOptionsChange }) => {
+export const MapComponent: React.FC<Props> = ({ options, data, onOptionsChange }) => {
   const styles = useStyles2(MapContainesStyles);
   const selectedObjectId = options.selectedObjectId || 'all';
-
+  
   const dateToDisplay = options.dateToDisplay || TODAY_STRING;
   const mapCenter: LatLngExpression = [options.lat, options.lng];
   const tailVisibility = options.isTailVisible;
@@ -78,8 +78,7 @@ export const MapComponent: React.FC<Props> = ({ options, width, height, data, on
   };
   return (
     <>
-      <MapContainer center={mapCenter} zoom={zoomValue} scrollWheelZoom={true} className={styles.wrapper} attributionControl	>
-        
+      <MapContainer center={mapCenter} zoom={zoomValue} scrollWheelZoom={true} className={styles.wrapper}>
         <LayersControl>
           <LayersControl.BaseLayer name="OpenStreetMap" checked={true}>
             <TileLayer
@@ -163,6 +162,7 @@ export const MapComponent: React.FC<Props> = ({ options, width, height, data, on
             options={options} 
             onOptionsChange={onOptionsChange} 
             objects={objects}
+            currentObjects={currentObjects}
           />
       </MapContainer>
     </>
