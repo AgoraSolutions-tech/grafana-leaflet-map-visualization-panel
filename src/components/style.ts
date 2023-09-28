@@ -97,6 +97,14 @@ export const PolygonEditorStyles = () => {
       width: 100%;
       margin-top: 5px;
     `,
+    buttonGroup: css`
+      display: flex;
+      flex-direction: column;
+    `,
+    successAlert: css`
+      height: 40px;
+      margin-top: 20px;
+    `
   };
 };
 

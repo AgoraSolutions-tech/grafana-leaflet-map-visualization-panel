@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Button, HorizontalGroup, Input, Label, useStyles2 } from '@grafana/ui';
+import { Button, ConfirmModal, HorizontalGroup, Input, Label, useStyles2 } from '@grafana/ui';
 import { uniqueId } from 'helpers';
 import { Control, FormState, UseFormGetFieldState, useFieldArray } from 'react-hook-form';
 import { Area } from 'types';
@@ -13,10 +13,14 @@ interface Props {
   initialIsOpen?: boolean;
   formState: FormState<{ areas: Array<Area>; isTooltipSticky: boolean }>;
   getFieldState: UseFormGetFieldState<{ areas: Array<Area>; isTooltipSticky: boolean }>;
+  setShowSuccessAlert: (boolean: boolean) => void
 }
 
-export const VerticlesForm = ({ control, register, index, initialIsOpen = false, formState, getFieldState }: Props) => {
-  const [isOpen, setIsOpen] = useState(initialIsOpen);
+export const VerticlesForm = ({ control, register, index, initialIsOpen = false, formState, getFieldState, setShowSuccessAlert }: Props) => {
+  const [ isOpen, setIsOpen ] = useState(initialIsOpen);
+  const [ isModalOpen, setIsModalOpen ] = useState(false);
+  const [ currentVertexIndex, setCurrentVertexIndex ] = useState<number>();
+  
   const styles = useStyles2(VerticlesFormStyles);
   const errors = formState.errors;
 
@@ -35,7 +39,10 @@ export const VerticlesForm = ({ control, register, index, initialIsOpen = false,
         variant="secondary"
         size="xs"
         fill={isOpen ? 'text' : 'outline'}
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => {
+          setShowSuccessAlert(false);
+          setIsOpen(!isOpen);
+        }}
         icon={isOpen ? 'angle-up' : 'angle-down'}
         tooltip={isOpen ? 'Hide verticles' : "Show all area's verticles"}
         className={isOpen ? styles.verticlesLabel : ''}
@@ -88,18 +95,37 @@ export const VerticlesForm = ({ control, register, index, initialIsOpen = false,
                       />
                     </div>
                   </div>
-                  <Button
-                    icon="trash-alt"
-                    onClick={() => {
+                  {fields.length >= 4 && (
+                    <Button
+                      icon="trash-alt"
+                      onClick={() => {
+                        setShowSuccessAlert(false);
+                        setCurrentVertexIndex(vertexIndex);
+                        setIsModalOpen(true);
+                      }}
+                      variant="secondary"
+                      size="sm"
+                      fill="text"
+                      tooltip={'Remove this vertex'}
+                      className={vertexIndex === 0 ? styles.firstVertex : ''}
+                    />
+                  )}
+                  <ConfirmModal
+                    isOpen={isModalOpen}
+                    title={'Delete vertex'}
+                    body={'Are you sure that you want to delete this vertex'}
+                    confirmText={'Delete'}
+                    onConfirm={() => {
                       if (fields.length >= 4) {
-                        remove(vertexIndex);
+                        remove(currentVertexIndex);
                       }
+                      setCurrentVertexIndex(undefined);
+                      setIsModalOpen(false);
                     }}
-                    variant="secondary"
-                    size="sm"
-                    fill="text"
-                    tooltip={'Remove this vertex'}
-                    className={vertexIndex === 0 ? styles.firstVertex : ''}
+                    onDismiss={() => {
+                      setCurrentVertexIndex(undefined);
+                      setIsModalOpen(false);
+                    }}
                   />
                 </HorizontalGroup>
               </div>
@@ -108,13 +134,14 @@ export const VerticlesForm = ({ control, register, index, initialIsOpen = false,
         </div>
         <Button
           style={{ marginRight: '1rem' }}
-          onClick={() =>
+          onClick={() => {
+            setShowSuccessAlert(false);
             append({
               id: uniqueId(),
               lat: fields[fields.length - 1].lat,
               lng: fields[fields.length - 1].lng,
-            })
-          }
+            });
+          }}
           variant="secondary"
           size="sm"
           icon="plus"
