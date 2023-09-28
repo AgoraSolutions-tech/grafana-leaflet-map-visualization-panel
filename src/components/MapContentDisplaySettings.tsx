@@ -18,7 +18,7 @@ interface Props {
 const TODAY = new Date();
 const TODAY_STRING = TODAY.toDateString();
 
-export const CustomControls = (props: Props) => {
+export const MapContentDisplaySettings = (props: Props) => {
   const [ isCalendarOpen, setIsCalendarOpen ] = useState(false);
   const map = useMap();
 

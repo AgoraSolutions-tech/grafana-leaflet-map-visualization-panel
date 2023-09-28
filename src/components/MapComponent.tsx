@@ -13,7 +13,7 @@ import 'leaflet-draw/dist/leaflet.draw.css';
 import './styles.css';
 import { MapContainesStyles } from './style';
 import { PolygonCreator } from './PolygonCreator';
-import { CustomControls } from './MapContentDisplaySettings';
+import { MapContentDisplaySettings } from './MapContentDisplaySettings';
 
 interface Props extends PanelProps<MapOptions> {}
 
@@ -157,7 +157,7 @@ export const MapComponent: React.FC<Props> = ({ options, data, onOptionsChange }
               </>
             );
           })}
-          <CustomControls 
+          <MapContentDisplaySettings 
             options={options}
             onOptionsChange={onOptionsChange}
             currentObjects={currentObjects} 
