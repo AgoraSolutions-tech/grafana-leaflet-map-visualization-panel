@@ -16,7 +16,7 @@ export const PolygonEditor = ({ value, onChange, context }: PolygonEditorProps) 
   const { control, register, watch, setValue, handleSubmit, formState, getFieldState } = useForm<{
     areas: Array<Area>;
     isTooltipSticky: boolean;
-  }>({values: { areas: value?.areas || [], isTooltipSticky: !!value?.isTooltipSticky} });
+  }>({ values: { areas: value?.areas || [], isTooltipSticky: !!value?.isTooltipSticky } });
 
   const { append, fields, remove } = useFieldArray({ control, name: 'areas' });
 
@@ -56,6 +56,9 @@ export const PolygonEditor = ({ value, onChange, context }: PolygonEditorProps) 
               <input {...register(`areas.${index}.id` as const)} type="hidden" />
               <HorizontalGroup>
                 <div>
+                  <div className={styles.errorMessage}>
+                    <ErrorMessage name={`areas.${index}.name`} errors={formState.errors} />
+                  </div>
                   <Label>Name</Label>
                   <Input
                     invalid={isFieldInvalid(index)}
@@ -64,15 +67,19 @@ export const PolygonEditor = ({ value, onChange, context }: PolygonEditorProps) 
                   />
                 </div>
                 <div>
+                  <div className={styles.errorMessage}>
+                    <ErrorMessage name={`areas.${index}.color`} errors={formState.errors} />
+                  </div>
                   <Label>Color</Label>
                   <ColorPickerInput
                     value={watch(`areas.${index}.color`)}
-                    {...register(`areas.${index}.color` as const)}
+                    {...register(`areas.${index}.color` as const, { required: 'Enter or select color' })}
                     onChange={(color) => {
                       setValue(`areas.${index}.color`, color);
                     }}
                   />
                 </div>
+
                 <Button
                   variant="secondary"
                   size="lg"
@@ -82,9 +89,7 @@ export const PolygonEditor = ({ value, onChange, context }: PolygonEditorProps) 
                   tooltip="Remove the area"
                 />
               </HorizontalGroup>
-              <div className={styles.errorMessage}>
-                <ErrorMessage name={`areas.${index}.name`} errors={formState.errors} />
-              </div>
+
               <br />
               <VerticlesForm
                 initialIsOpen={field.isNew}
@@ -96,11 +101,11 @@ export const PolygonEditor = ({ value, onChange, context }: PolygonEditorProps) 
               />
               <div style={{ margin: '10px 0 20px', height: '1px', width: '100%' }} />
             </div>
-))}
+          ))}
         </div>
         <Button
           style={{ marginRight: '1rem' }}
-          type='button'
+          type="button"
           onClick={() => {
             append({
               id: uniqueId(),
