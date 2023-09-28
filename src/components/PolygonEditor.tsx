@@ -1,7 +1,17 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { StandardEditorProps } from '@grafana/data';
 import { Area } from 'types';
-import { Button, ColorPickerInput, HorizontalGroup, InlineSwitch, Input, Label, useStyles2 } from '@grafana/ui';
+import {
+  Alert,
+  Button,
+  ColorPickerInput,
+  ConfirmModal,
+  HorizontalGroup,
+  InlineSwitch,
+  Input,
+  Label,
+  useStyles2,
+} from '@grafana/ui';
 import { useFieldArray, useForm } from 'react-hook-form';
 import { VerticlesForm } from './VerticlesForm';
 import { calculatePolygonVerticles, uniqueId } from 'helpers';
@@ -12,6 +22,9 @@ type PolygonEditorProps = StandardEditorProps<{ isTooltipSticky: boolean; areas:
 
 export const PolygonEditor = ({ value, onChange, context }: PolygonEditorProps) => {
   const styles = useStyles2(PolygonEditorStyles);
+  const [showSuccessAlert, setShowSuccessAlert] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [fieldIndex, setFieldIndex] = useState<number>();
 
   const { control, register, watch, setValue, handleSubmit, formState, getFieldState } = useForm<{
     areas: Array<Area>;
@@ -45,6 +58,7 @@ export const PolygonEditor = ({ value, onChange, context }: PolygonEditorProps) 
       <div>
         <div className={styles.tooltipWrapper}>
           <InlineSwitch
+            onClick={() => setShowSuccessAlert(false)}
             showLabel={true}
             {...register(`isTooltipSticky` as const)}
             label={watch(`isTooltipSticky`) ? 'Always show area names' : 'Show area names on hover'}
@@ -61,6 +75,7 @@ export const PolygonEditor = ({ value, onChange, context }: PolygonEditorProps) 
                   </div>
                   <Label>Name</Label>
                   <Input
+                    onClick={() => setShowSuccessAlert(false)}
                     invalid={isFieldInvalid(index)}
                     {...register(`areas.${index}.name` as const, { required: 'Enter area name', maxLength: 255 })}
                     placeholder="Enter the area name"
@@ -72,6 +87,7 @@ export const PolygonEditor = ({ value, onChange, context }: PolygonEditorProps) 
                   </div>
                   <Label>Color</Label>
                   <ColorPickerInput
+                    onClick={() => setShowSuccessAlert(false)}
                     value={watch(`areas.${index}.color`)}
                     {...register(`areas.${index}.color` as const, { required: 'Enter or select color' })}
                     onChange={(color) => {
@@ -85,8 +101,27 @@ export const PolygonEditor = ({ value, onChange, context }: PolygonEditorProps) 
                   size="lg"
                   fill="text"
                   icon="x"
-                  onClick={() => remove(index)}
-                  tooltip="Remove the area"
+                  onClick={() => {
+                    setShowSuccessAlert(false);
+                    setFieldIndex(index);
+                    setIsModalOpen(true);
+                  }}
+                  tooltip={`Remove  ${field.name}`}
+                />
+                <ConfirmModal
+                  isOpen={isModalOpen}
+                  title={fieldIndex ? 'Delete ' + fields[fieldIndex].name : ''}
+                  body={`Are you sure you want to delete ${field.name}`}
+                  confirmText={'Delete'}
+                  onConfirm={() => {
+                    remove(fieldIndex);
+                    setFieldIndex(undefined);
+                    setIsModalOpen(false);
+                  }}
+                  onDismiss={() => {
+                    setFieldIndex(undefined);
+                    setIsModalOpen(false);
+                  }}
                 />
               </HorizontalGroup>
 
@@ -98,33 +133,40 @@ export const PolygonEditor = ({ value, onChange, context }: PolygonEditorProps) 
                 index={index}
                 formState={formState}
                 getFieldState={getFieldState}
+                setShowSuccessAlert={setShowSuccessAlert}
               />
               <div style={{ margin: '10px 0 20px', height: '1px', width: '100%' }} />
             </div>
           ))}
         </div>
-        <Button
-          style={{ marginRight: '1rem' }}
-          type="button"
-          onClick={() => {
-            append({
-              id: uniqueId(),
-              isNew: true,
-              name: `Area ${fields ? fields.length + 1 : 1}`,
-              color: 'red',
-              verticles: calculatePolygonVerticles(context.options.lat, context.options.lng),
-            });
-          }}
-          variant="secondary"
-          size="sm"
-          icon="plus"
-          tooltip={'Add new area on the center of map'}
-        >
-          Add area
-        </Button>
-        <Button type="submit" variant="secondary" size="sm">
-          Save
-        </Button>
+        <div>
+          <Button
+            style={{ marginRight: '1rem' }}
+            type="button"
+            onClick={() => {
+              setShowSuccessAlert(false);
+              append({
+                id: uniqueId(),
+                isNew: true,
+                name: `Area ${fields ? fields.length + 1 : 1}`,
+                color: 'red',
+                verticles: calculatePolygonVerticles(context.options.lat, context.options.lng),
+              });
+            }}
+            variant="secondary"
+            size="sm"
+            icon="plus"
+            tooltip={'Add new area on the center of map'}
+          >
+            Add area
+          </Button>
+          <Button type="submit" variant="secondary" size="sm" onClick={() => setShowSuccessAlert(true)}>
+            Save
+          </Button>
+          {showSuccessAlert && (
+            <Alert className={styles.successAlert} title={'Saved'} severity="success" />
+          )}
+        </div>
       </div>
     </form>
   );
