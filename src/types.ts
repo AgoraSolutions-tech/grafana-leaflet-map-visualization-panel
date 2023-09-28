@@ -37,6 +37,7 @@ export interface MapOptions {
   isTailVisible: boolean;
   controlKey: number;
   dateToDisplay: string;
+  selectedObjectId: string;
   areas: {
     isTooltipSticky: boolean;
     areas: Array<Area>;
