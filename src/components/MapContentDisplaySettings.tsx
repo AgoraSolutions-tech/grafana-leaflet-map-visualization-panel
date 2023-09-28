@@ -6,10 +6,11 @@ import { CustomControlsStyles } from './style';
 import show from '../img/show.png';
 import hide from '../img/hide.png';
 import { formatDistance, isSameDay } from 'date-fns';
+import { useMap } from 'react-leaflet';
 
 interface Props {
   options: MapOptions;
-  objects: MovingObject[];
+  currentSelectedbjects: MovingObject[];
   currentObjects: MovingObject[];
   onOptionsChange:  (options: MapOptions) => void;
 }
@@ -19,6 +20,7 @@ const TODAY_STRING = TODAY.toDateString();
 
 export const CustomControls = (props: Props) => {
   const [ isCalendarOpen, setIsCalendarOpen ] = useState(false);
+  const map = useMap();
 
   const styles = useStyles2(CustomControlsStyles);
   const tailVisibility = props.options.isTailVisible;
@@ -39,21 +41,31 @@ export const CustomControls = (props: Props) => {
         <div className={'leaflet-control' + ' ' + styles.controlWrapper}>
           <select
             onChange={e => {
-              const chosenObject = props.currentObjects.find(object => String(object.id) === e.target.value)
-              props.onOptionsChange({
+              const selectedObject = props.currentObjects.find(object => String(object.id) === e.target.value);
+            
+              if(!selectedObject){
+                props.onOptionsChange({
+                  ...props.options,
+                  selectedObjectId: e.target.value
+                })
+                return
+              };
+
+              props.onOptionsChange({ 
               ...props.options, 
-              lat: chosenObject?.positions[0].lat || props.options.lat,
-              lng: chosenObject?.positions[0].lng || props.options.lng,
+              lat: selectedObject?.positions[0].lat || props.options.lat,
+              lng: selectedObject?.positions[0].lng || props.options.lng,
               selectedObjectId: e.target.value
             })
+            map.flyTo([selectedObject.positions[0].lat, selectedObject.positions[0].lng])
           }}
             className={`leaflet-control ${styles.styledButton} ${styles.styledSelect}`}
           >
             <option value="all" selected={selectedObjectId === 'all'}>See all objects</option>
-            {props.objects.map((object, index) => {
+            {props.currentObjects.map(object => {
               return (
                 <option 
-                  key={index} 
+                  key={object.id} 
                   value={object.id} 
                   selected={selectedObjectId === String(object.id)}
                 >

@@ -13,7 +13,7 @@ import 'leaflet-draw/dist/leaflet.draw.css';
 import './styles.css';
 import { MapContainesStyles } from './style';
 import { PolygonCreator } from './PolygonCreator';
-import { CustomControls } from './CustomControls';
+import { CustomControls } from './MapContentDisplaySettings';
 
 interface Props extends PanelProps<MapOptions> {}
 
@@ -23,7 +23,6 @@ const TODAY_STRING = TODAY.toDateString();
 export const MapComponent: React.FC<Props> = ({ options, data, onOptionsChange }) => {
   const styles = useStyles2(MapContainesStyles);
   const selectedObjectId = options.selectedObjectId || 'all';
-  
   const dateToDisplay = options.dateToDisplay || TODAY_STRING;
   const mapCenter: LatLngExpression = [options.lat, options.lng];
   const tailVisibility = options.isTailVisible;
@@ -64,15 +63,15 @@ export const MapComponent: React.FC<Props> = ({ options, data, onOptionsChange }
     return [...acc, newObject];
   }, []);
 
-  const currentObjects = objects
+  const currentObjects: MovingObject[] = objects
     .map((object) => ({
       ...object,
       positions: object.positions.filter((position) => isSameDay(position.timestamp, new Date(dateToDisplay))),
     }))
-    .filter((object) => object.positions.length > 0)
-    .filter(object => selectedObjectId === 'all' ? object : String(object.id) === selectedObjectId
-    );
+    .filter((object) => object.positions.length > 0);   
 
+  const currrentSelectedObjects = currentObjects.filter(object => selectedObjectId === 'all' || String(object.id) === selectedObjectId);
+  
   const handleMapEventTrigger = (position: { lng: number; lat: number }, newValue: number) => {
     onOptionsChange({ ...options, lat: position.lat, lng: position.lng, zoom: newValue });
   };
@@ -103,9 +102,9 @@ export const MapComponent: React.FC<Props> = ({ options, data, onOptionsChange }
         </LayersControl>
         <MapContainerDescendant onMapEventTrigger={handleMapEventTrigger} options={options}/>
         <PolygonCreator onOptionsChange={onOptionsChange} options={options} objects={objects} controlKey={controlKey} />
-        {currentObjects &&
-          currentObjects.length > 0 &&
-          currentObjects.map((object) => {
+        {currrentSelectedObjects &&
+          currrentSelectedObjects.length > 0 &&
+          currrentSelectedObjects.map((object) => {
             const position = [object?.positions[0].lat, object.positions[0].lng] as LatLngExpression;
             const currentTimestamp = new Date(object.positions[0].timestamp);
             const currDate = format(currentTimestamp, 'dd-MM-yyyy');
@@ -159,10 +158,10 @@ export const MapComponent: React.FC<Props> = ({ options, data, onOptionsChange }
             );
           })}
           <CustomControls 
-            options={options} 
-            onOptionsChange={onOptionsChange} 
-            objects={objects}
-            currentObjects={currentObjects}
+            options={options}
+            onOptionsChange={onOptionsChange}
+            currentObjects={currentObjects} 
+            currentSelectedbjects={currrentSelectedObjects}          
           />
       </MapContainer>
     </>
