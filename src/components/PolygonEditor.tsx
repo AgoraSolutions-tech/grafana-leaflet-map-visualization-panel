@@ -70,6 +70,9 @@ export const PolygonEditor = ({ value, onChange, context }: PolygonEditorProps) 
               <input {...register(`areas.${index}.id` as const)} type="hidden" />
               <HorizontalGroup>
                 <div>
+                  <div className={styles.errorMessage}>
+                    <ErrorMessage name={`areas.${index}.name`} errors={formState.errors} />
+                  </div>
                   <Label>Name</Label>
                   <Input
                     onClick={() => setShowSuccessAlert(false)}
@@ -79,16 +82,20 @@ export const PolygonEditor = ({ value, onChange, context }: PolygonEditorProps) 
                   />
                 </div>
                 <div>
+                  <div className={styles.errorMessage}>
+                    <ErrorMessage name={`areas.${index}.color`} errors={formState.errors} />
+                  </div>
                   <Label>Color</Label>
                   <ColorPickerInput
                     onClick={() => setShowSuccessAlert(false)}
                     value={watch(`areas.${index}.color`)}
-                    {...register(`areas.${index}.color` as const)}
+                    {...register(`areas.${index}.color` as const, { required: 'Enter or select color' })}
                     onChange={(color) => {
                       setValue(`areas.${index}.color`, color);
                     }}
                   />
                 </div>
+
                 <Button
                   variant="secondary"
                   size="lg"
@@ -117,9 +124,7 @@ export const PolygonEditor = ({ value, onChange, context }: PolygonEditorProps) 
                   }}
                 />
               </HorizontalGroup>
-              <div className={styles.errorMessage}>
-                <ErrorMessage name={`areas.${index}.name`} errors={formState.errors} />
-              </div>
+
               <br />
               <VerticlesForm
                 initialIsOpen={field.isNew}
