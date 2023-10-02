@@ -1,11 +1,11 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { PanelProps } from '@grafana/data';
 import { TileLayer, MapContainer, Marker, Polyline, Popup, LayersControl } from 'react-leaflet';
 import L, { LatLngExpression } from 'leaflet';
 import { MovingObject, MapOptions, Area, Vertex } from 'types';
 import { useStyles2 } from '@grafana/ui';
 import { MapContainerDescendant } from './MapContainerDescendant';
-import { colorValues, isPointInPoly } from 'helpers';
+import { colorValues, debouncedResizeHandler, isPointInPoly } from 'helpers';
 import { format, isSameDay } from 'date-fns';
 
 import 'leaflet/dist/leaflet.css';
@@ -20,7 +20,14 @@ interface Props extends PanelProps<MapOptions> {}
 const TODAY = new Date();
 const TODAY_STRING = TODAY.toDateString();
 
-export const MapComponent: React.FC<Props> = ({ options, data, onOptionsChange }) => {
+export const MapComponent: React.FC<Props> = ({ options, data, onOptionsChange, width, height }) => {
+  useEffect(() => {
+    debouncedResizeHandler();
+    return () => {
+      debouncedResizeHandler.cancel();
+    };
+  }, [width, height]);
+
   const styles = useStyles2(MapContainesStyles);
   const selectedObjectId = options.selectedObjectId || 'all';
   const dateToDisplay = options.dateToDisplay || TODAY_STRING;
@@ -68,10 +75,12 @@ export const MapComponent: React.FC<Props> = ({ options, data, onOptionsChange }
       ...object,
       positions: object.positions.filter((position) => isSameDay(position.timestamp, new Date(dateToDisplay))),
     }))
-    .filter((object) => object.positions.length > 0);   
+    .filter((object) => object.positions.length > 0);
 
-  const currrentSelectedObjects = currentObjects.filter(object => selectedObjectId === 'all' || String(object.id) === selectedObjectId);
-  
+  const currrentSelectedObjects = currentObjects.filter(
+    (object) => selectedObjectId === 'all' || String(object.id) === selectedObjectId
+  );
+
   const handleMapEventTrigger = (position: { lng: number; lat: number }, newValue: number) => {
     onOptionsChange({ ...options, lat: position.lat, lng: position.lng, zoom: newValue });
   };
@@ -100,7 +109,7 @@ export const MapComponent: React.FC<Props> = ({ options, data, onOptionsChange }
             />
           </LayersControl.BaseLayer>
         </LayersControl>
-        <MapContainerDescendant onMapEventTrigger={handleMapEventTrigger} options={options}/>
+        <MapContainerDescendant onMapEventTrigger={handleMapEventTrigger} options={options} />
         <PolygonCreator onOptionsChange={onOptionsChange} options={options} objects={objects} controlKey={controlKey} />
         {currrentSelectedObjects &&
           currrentSelectedObjects.length > 0 &&
@@ -157,12 +166,12 @@ export const MapComponent: React.FC<Props> = ({ options, data, onOptionsChange }
               </>
             );
           })}
-          <MapContentDisplaySettings 
-            options={options}
-            onOptionsChange={onOptionsChange}
-            currentObjects={currentObjects} 
-            currentSelectedbjects={currrentSelectedObjects}          
-          />
+        <MapContentDisplaySettings
+          options={options}
+          onOptionsChange={onOptionsChange}
+          currentObjects={currentObjects}
+          currentSelectedbjects={currrentSelectedObjects}
+        />
       </MapContainer>
     </>
   );

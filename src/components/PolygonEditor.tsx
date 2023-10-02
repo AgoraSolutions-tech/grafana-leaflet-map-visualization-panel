@@ -110,8 +110,8 @@ export const PolygonEditor = ({ value, onChange, context }: PolygonEditorProps) 
                 />
                 <ConfirmModal
                   isOpen={isModalOpen}
-                  title={fieldIndex ? 'Delete ' + fields[fieldIndex].name : ''}
-                  body={`Are you sure you want to delete ${field.name}`}
+                  title={`Delete  ${fieldIndex ? fields[fieldIndex].name : 'area'}`}
+                  body={`Are you sure you want to delete ${fieldIndex ? fields[fieldIndex].name : 'this area'}?`}
                   confirmText={'Delete'}
                   onConfirm={() => {
                     remove(fieldIndex);
