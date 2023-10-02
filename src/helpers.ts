@@ -1,3 +1,5 @@
+import { debounce } from "lodash";
+
 export const uniqueId = (length = 16) => {
   return parseInt(
     Math.ceil(Math.random() * Date.now())
@@ -56,3 +58,9 @@ export const calculatePolygonVerticles = (lat: number, lng: number) => {
     { lat: lat + diff, lng: lng + diff, id: uniqueId() },
   ];
 };
+
+const triggerWindowResize = () => {
+  window.dispatchEvent(new Event('resize'))
+};
+
+export const debouncedResizeHandler =  debounce(triggerWindowResize, 500);
